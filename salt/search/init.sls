@@ -23,6 +23,19 @@ search-repository:
         - require:
             - builder: search-repository
 
+search-cache:
+    file.directory:
+        - name: /srv/search/cache
+        - user: {{ pillar.elife.webserver.username }}
+        - group: {{ pillar.elife.webserver.username }}
+        - dir_mode: 775
+        - file_mode: 664
+        - recurse:
+            - user
+            - group
+        - require:
+            - search-repository
+
 composer-install:
     cmd.run:
         {% if pillar.elife.env in ['prod', 'demo', 'end2end'] %}
