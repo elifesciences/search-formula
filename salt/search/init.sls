@@ -48,7 +48,7 @@ composer-install:
         - cwd: /srv/search/
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
-            - search-repository
+            - search-cache
 
 search-nginx-vhost:
     file.managed:
@@ -57,6 +57,7 @@ search-nginx-vhost:
         - template: jinja
         - require:
             - nginx-config
+            - composer-install
         - listen_in:
             - service: nginx-server-service
             - service: php-fpm
