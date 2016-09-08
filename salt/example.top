@@ -5,5 +5,7 @@ base:
         - elife.nginx
         - elife.nginx-php7
         - elife.puli
+        - elife.gearman
         - search
+        #- search.processes
         - elife.proofreader-php

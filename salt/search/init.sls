@@ -61,3 +61,24 @@ search-nginx-vhost:
         - listen_in:
             - service: nginx-server-service
             - service: php-fpm
+
+search-gearman-worker-service:
+    file.managed:
+        - name: /etc/init/search-gearman-worker.conf
+        - source: salt://search/config/etc-init-search-gearman-worker.conf
+        - template: jinja
+        - require:
+            - composer-install
+
+{% set number = 3 %}
+
+search-gearman-workers-task:
+    file.managed:
+        - name: /etc/init/search-gearman-workers.conf
+        - source: salt://elife/config/etc-init-multiple-processes.conf
+        - template: jinja
+        - context:
+            process: search-gearman-worker
+            number: {{ number }}
+        - require:
+            - file: search-gearman-worker-service
