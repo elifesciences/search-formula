@@ -41,7 +41,7 @@ composer-install:
         {% if pillar.elife.env in ['prod', 'demo', 'end2end'] %}
         - name: composer1.0 --no-interaction install --classmap-authoritative --no-dev
         {% elif pillar.elife.env in ['ci'] %}
-        - name: composer1.0 --no-interaction install --classmap-authoritative 
+        - name: composer1.0 --no-interaction install --classmap-authoritative
         {% else %}
         - name: composer1.0 --no-interaction install
         {% endif %}
@@ -49,6 +49,14 @@ composer-install:
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
             - search-cache
+
+search-ensure-index:
+    cmd.run:
+        - name: php bin/console search:setup
+        - cwd: /srv/search/
+        - user: {{ pillar.elife.deploy_user.username }}
+        - require:
+            - composer-install
 
 search-nginx-vhost:
     file.managed:
