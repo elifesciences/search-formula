@@ -52,7 +52,7 @@ composer-install:
 
 search-ensure-index:
     cmd.run:
-        - name: php bin/console search:setup
+        - name: ./bin/console search:setup
         - cwd: /srv/search/
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
