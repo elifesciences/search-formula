@@ -6,6 +6,9 @@ base:
         - elife.nginx-php7
         - elife.puli
         - elife.gearman
+        #- elife.nodejs
+        - search.java
         - search
         #- search.processes
+        - search.elasticsearch
         - elife.proofreader-php

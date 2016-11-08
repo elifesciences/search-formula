@@ -22,7 +22,6 @@ search-repository:
             - group
         - require:
             - builder: search-repository
-
 search-cache:
     file.directory:
         - name: /srv/search/cache
@@ -41,7 +40,7 @@ composer-install:
         {% if pillar.elife.env in ['prod', 'demo', 'end2end'] %}
         - name: composer1.0 --no-interaction install --classmap-authoritative --no-dev
         {% elif pillar.elife.env in ['ci'] %}
-        - name: composer1.0 --no-interaction install --classmap-authoritative 
+        - name: composer1.0 --no-interaction install --classmap-authoritative
         {% else %}
         - name: composer1.0 --no-interaction install
         {% endif %}
