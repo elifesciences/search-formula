@@ -1,6 +1,5 @@
 # Add the oracle jvm ppa, and install java8
 # https://launchpad.net/~webupd8team/+archive/ubuntu/java
-# NOTE: Let me know if you require openjdk version.
 
 oracle-ppa:
   pkgrepo.managed:
@@ -22,3 +21,4 @@ oracle-java8-installer:
     - installed
     - require:
       - pkgrepo: oracle-ppa
+      - oracle-license-select
