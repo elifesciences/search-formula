@@ -49,6 +49,14 @@ composer-install:
         - require:
             - search-cache
 
+search-ensure-index:
+    cmd.run:
+        - name: ./bin/console search:setup
+        - cwd: /srv/search/
+        - user: {{ pillar.elife.deploy_user.username }}
+        - require:
+            - composer-install
+
 search-nginx-vhost:
     file.managed:
         - name: /etc/nginx/sites-enabled/search.conf
