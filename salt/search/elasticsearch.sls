@@ -22,7 +22,8 @@ elasticsearch:
 
     pkg:
         - installed
-        - version: 5.0
+        - refresh: True
+        - version: 5.0.0
         - require:
             - pkg: oracle-java8-installer
             - pkgrepo: elasticsearch-repo
