@@ -8,6 +8,6 @@ base:
         - elife.gearman
         - search.java
         - search
-        #- search.processes
+        - search.processes
         - search.elasticsearch
         - elife.proofreader-php

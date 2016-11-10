@@ -4,7 +4,7 @@
 elasticsearch-repo:
     pkgrepo.managed:
         - humanname: Official Elasticsearch PPA
-        - name: deb http://packages.elasticsearch.org/elasticsearch/2.x/debian stable main
+        - name: deb https://artifacts.elastic.co/packages/5.x/apt stable main
         - dist: stable
         - file: /etc/apt/sources.list.d/elasticsearch.list
         - key_url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
@@ -23,7 +23,7 @@ elasticsearch:
     pkg:
         - installed
         - refresh: True
-        - version: 2.4.0
+        - version: 5.0.0
         - require:
             - pkg: oracle-java8-installer
             - pkgrepo: elasticsearch-repo
