@@ -35,7 +35,7 @@ search-cache:
         - require:
             - search-repository
 
-composer-install:
+search-composer-install:
     cmd.run:
         {% if pillar.elife.env in ['prod', 'demo', 'end2end'] %}
         - name: composer1.0 --no-interaction install --classmap-authoritative --no-dev
@@ -55,7 +55,7 @@ search-ensure-index:
         - cwd: /srv/search/
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
-            - composer-install
+            - search-composer-install
 
 search-nginx-vhost:
     file.managed:
@@ -64,7 +64,7 @@ search-nginx-vhost:
         - template: jinja
         - require:
             - nginx-config
-            - composer-install
+            - search-composer-install
         - listen_in:
             - service: nginx-server-service
             - service: php-fpm
@@ -87,5 +87,5 @@ search-gearman-worker-service:
         - source: salt://search/config/etc-init-search-gearman-worker.conf
         - template: jinja
         - require:
-            - composer-install
             - aws-credentials-cli
+            - search-composer-install
