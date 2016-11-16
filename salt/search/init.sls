@@ -64,6 +64,7 @@ search-import-content:
         - cwd: /srv/search/
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
+            - api-dummy-nginx-vhost-dev
             - search-ensure-index
             - search-gearman-worker-service
 {% endif %}
