@@ -57,6 +57,17 @@ search-ensure-index:
         - require:
             - search-composer-install
 
+{% if pillar.elife.env in ['dev', 'ci'] %}
+search-import-content:
+    cmd.run:
+        - name: ./bin/console gearman:import all
+        - cwd: /srv/search/
+        - user: {{ pillar.elife.deploy_user.username }}
+        - require:
+            - search-ensure-index
+            - search-gearman-worker-service
+{% endif %}
+
 search-nginx-vhost:
     file.managed:
         - name: /etc/nginx/sites-enabled/search.conf
@@ -81,11 +92,14 @@ aws-credentials-cli:
             - deploy-user
 
 
-search-gearman-worker-service:
+{% set processes = ['gearman-worker', 'queue-watch'] %}
+{% for process in processes %}
+search-{{ process }}-service:
     file.managed:
-        - name: /etc/init/search-gearman-worker.conf
-        - source: salt://search/config/etc-init-search-gearman-worker.conf
+        - name: /etc/init/search-{{ process }}.conf
+        - source: salt://search/config/etc-init-search-{{ process }}.conf
         - template: jinja
         - require:
             - aws-credentials-cli
-            - search-composer-install
+            - search-ensure-index
+{% endfor %}
