@@ -1,17 +1,19 @@
-{% set number = 3 %}
-search-gearman-workers-task:
+{% set processes = {'gearman-workers': 3, 'queue-watch': 1} %}
+{% for process, number in processes.iteritems() %}
+search-{{ process }}-task:
     file.managed:
-        - name: /etc/init/search-gearman-workers.conf
+        - name: /etc/init/search-{{ process }}.conf
         - source: salt://elife/config/etc-init-multiple-processes.conf
         - template: jinja
         - context:
-            process: search-gearman-worker
+            process: search-{{ process }}
             number: {{ number }}
         - require:
-            - file: search-gearman-worker-service
+            - file: search-{{ process }}-service
 
-search-gearman-workers-start:
+search-{{ process }}-start:
     cmd.run:
-        - name: start search-gearman-workers
+        - name: start search-{{ process }}
         - require:
-            - search-gearman-workers-task
+            - search-{{ process }}-task
+{% endfor %}
