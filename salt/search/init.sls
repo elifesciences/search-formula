@@ -92,20 +92,14 @@ aws-credentials-cli:
             - deploy-user
 
 
-search-gearman-worker-service:
+{% set processes = ['gearman-worker', 'queue-watch'] %}
+{% for process in processes %}
+search-{{ process }}-service:
     file.managed:
-        - name: /etc/init/search-gearman-worker.conf
-        - source: salt://search/config/etc-init-search-gearman-worker.conf
+        - name: /etc/init/search-{{ process }}.conf
+        - source: salt://search/config/etc-init-search-{{ process }}.conf
         - template: jinja
         - require:
             - aws-credentials-cli
             - search-ensure-index
-
-search-queue-watch-service:
-    file.managed:
-        - name: /etc/init/search-queue-watch.conf
-        - source: salt://search/config/etc-init-search-queue-watch.conf
-        - template: jinja
-        - require:
-            - aws-credentials-cli
-            - search-ensure-index
+{% endfor %}
