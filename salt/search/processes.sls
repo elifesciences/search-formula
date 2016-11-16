@@ -1,4 +1,4 @@
-{% set processes = {'gearman-workers': 3, 'queue-watch': 1} %}
+{% set processes = {'gearman-worker': 3, 'queue-watch': 1} %}
 {% for process, number in processes.iteritems() %}
 search-{{ process }}-task:
     file.managed:
