@@ -99,4 +99,13 @@ search-gearman-worker-service:
         - template: jinja
         - require:
             - aws-credentials-cli
-            - search-composer-install
+            - search-ensure-index
+
+search-queue-watch-service:
+    file.managed:
+        - name: /etc/init/search-queue-watch.conf
+        - source: salt://search/config/etc-init-search-queue-watch.conf
+        - template: jinja
+        - require:
+            - aws-credentials-cli
+            - search-ensure-index
