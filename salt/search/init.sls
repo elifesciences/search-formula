@@ -51,7 +51,7 @@ search-composer-install:
 
 search-ensure-index:
     cmd.run:
-        - name: ./bin/console search:setup
+        - name: ./bin/console search:setup --env={{ pillar.elife.env }}
         - cwd: /srv/search/
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
@@ -60,7 +60,7 @@ search-ensure-index:
 {% if pillar.elife.env in ['dev', 'ci'] %}
 search-import-content:
     cmd.run:
-        - name: ./bin/console gearman:import all
+        - name: ./bin/console gearman:import all --env={{ pillar.elife.env }}
         - cwd: /srv/search/
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
