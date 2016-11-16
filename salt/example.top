@@ -9,5 +9,7 @@ base:
         - search.java
         - search
         - search.processes
+        - api-dummy
         - search.elasticsearch
         - elife.proofreader-php
+        - search.api-dummy
