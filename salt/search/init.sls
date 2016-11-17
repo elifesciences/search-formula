@@ -60,10 +60,11 @@ search-ensure-index:
 {% if pillar.elife.env in ['dev', 'ci'] %}
 search-import-content:
     cmd.run:
-        - name: ./bin/console gearman:import all --env={{ pillar.elife.env }}
+        - name: ./bin/ci-import {{ pillar.elife.env }}
         - cwd: /srv/search/
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
+            - elasticsearch
             - api-dummy-nginx-vhost-dev
             - search-ensure-index
             - search-gearman-worker-service
