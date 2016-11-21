@@ -13,7 +13,7 @@ search-{{ process }}-task:
 
 search-{{ process }}-start:
     cmd.run:
-        - name: start search-{{ process }}
+        - name: start search-{{ process }}s
         - require:
             - search-{{ process }}-task
 {% endfor %}
