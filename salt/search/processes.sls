@@ -2,7 +2,7 @@
 {% for process, number in processes.iteritems() %}
 search-{{ process }}-task:
     file.managed:
-        - name: /etc/init/search-{{ process }}.conf
+        - name: /etc/init/search-{{ process }}s.conf
         - source: salt://elife/config/etc-init-multiple-processes.conf
         - template: jinja
         - context:
