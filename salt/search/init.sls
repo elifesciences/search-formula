@@ -70,6 +70,17 @@ search-import-content:
             - search-gearman-worker-service
 {% endif %}
 
+{% if pillar.elife.env in ['dev', 'ci'] %}
+search-import-content:
+    cmd.run:
+        - name: ./bin/console gearman:import all
+        - cwd: /srv/search/
+        - user: {{ pillar.elife.deploy_user.username }}
+        - require:
+            - search-ensure-index
+            - search-gearman-worker-service
+{% endif %}
+
 search-nginx-vhost:
     file.managed:
         - name: /etc/nginx/sites-enabled/search.conf
