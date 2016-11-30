@@ -22,6 +22,10 @@ search-repository:
             - group
         - require:
             - builder: search-repository
+
+# files and directories must be readable and writable by both elife and www-data
+# they are both in the www-data group, but the g+s flag makes sure that
+# new files and directories created inside have the www-data group
 search-cache:
     file.directory:
         - name: /srv/search/cache
@@ -34,6 +38,11 @@ search-cache:
             - group
         - require:
             - search-repository
+
+    cmd.run:
+        - name: chmod -R g+s /srv/search/cache
+        - require:
+            - file: search-cache
 
 search-composer-install:
     cmd.run:
