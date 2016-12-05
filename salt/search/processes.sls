@@ -1,19 +1,26 @@
-{% set processes = {'gearman-worker': 3, 'queue-watch': 1} %}
+{% set processes = {'search-gearman-worker': 3, 'search-queue-watch': 1} %}
+
 {% for process, number in processes.iteritems() %}
-search-{{ process }}-task:
+{{process}}-old-restart-tasks:
+    file.absent:
+        - name: /etc/init/{{ process }}s.conf
+{% endfor %}
+
+
+search-processes-task:
     file.managed:
-        - name: /etc/init/search-{{ process }}s.conf
-        - source: salt://elife/config/etc-init-multiple-processes.conf
+        - name: /etc/init/search-processes.conf
+        - source: salt://elife/config/etc-init-multiple-processes-parallel.conf
         - template: jinja
         - context:
-            process: search-{{ process }}
-            number: {{ number }}
+            processes: {{ processes }}
         - require:
-            - file: search-{{ process }}-service
+            {% for process, _number in processes.iteritems() %}
+            - file: {{ process }}-service
+            {% endfor %}
 
-search-{{ process }}-start:
+search-processes-start:
     cmd.run:
-        - name: start search-{{ process }}s
+        - name: start search-processes
         - require:
-            - search-{{ process }}-task
-{% endfor %}
+            - search-processes-task
