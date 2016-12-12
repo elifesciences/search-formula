@@ -58,6 +58,18 @@ search-composer-install:
         - require:
             - search-cache
 
+aws-credentials-cli:
+    file.managed:
+        - name: /home/{{ pillar.elife.deploy_user.username }}/.aws/credentials
+        - source: salt://search/config/home-user-.aws-credentials
+        - user: {{ pillar.elife.deploy_user.username }}
+        - group: {{ pillar.elife.deploy_user.username }}
+        - makedirs: True
+        - template: jinja
+        - require:
+            - deploy-user
+
+
 search-ensure-index:
     cmd.run:
         - name: ./bin/console search:setup --env={{ pillar.elife.env }}
@@ -65,6 +77,7 @@ search-ensure-index:
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
             - search-composer-install
+            - aws-credentials-cli
 
 {% if pillar.elife.env in ['dev', 'ci'] %}
 search-import-content:
@@ -90,17 +103,6 @@ search-nginx-vhost:
         - listen_in:
             - service: nginx-server-service
             - service: php-fpm
-
-aws-credentials-cli:
-    file.managed:
-        - name: /home/{{ pillar.elife.deploy_user.username }}/.aws/credentials
-        - source: salt://search/config/home-user-.aws-credentials
-        - user: {{ pillar.elife.deploy_user.username }}
-        - group: {{ pillar.elife.deploy_user.username }}
-        - makedirs: True
-        - template: jinja
-        - require:
-            - deploy-user
 
 
 {% set processes = ['gearman-worker', 'queue-watch'] %}
