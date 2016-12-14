@@ -1,0 +1,7 @@
+/srv/search/var/logs/*.log {
+    daily
+    rotate 7
+    notifempty
+    missingok
+    compress
+}
