@@ -28,7 +28,7 @@ search-repository:
 # new files and directories created inside have the www-data group
 search-cache:
     file.directory:
-        - name: /srv/search/cache
+        - name: /srv/search/var
         - user: {{ pillar.elife.webserver.username }}
         - group: {{ pillar.elife.webserver.username }}
         - dir_mode: 775
@@ -40,7 +40,7 @@ search-cache:
             - search-repository
 
     cmd.run:
-        - name: chmod -R g+s /srv/search/cache
+        - name: chmod -R g+s /srv/search/var
         - require:
             - file: search-cache
 
@@ -104,6 +104,21 @@ search-nginx-vhost:
             - service: nginx-server-service
             - service: php-fpm
 
+syslog-ng-search-logs:
+    file.managed:
+        - name: /etc/syslog-ng/conf.d/search.conf
+        - source: salt://search/config/etc-syslog-ng-conf.d-search.conf
+        - template: jinja
+        - require:
+            - pkg: syslog-ng
+            - composer-install
+        - listen_in:
+            - service: syslog-ng
+
+logrotate-search-logs:
+    file.managed:
+        - name: /etc/logrotate.d/search
+        - source: salt://search/config/etc-logrotate.d-search
 
 {% set processes = ['gearman-worker', 'queue-watch'] %}
 {% for process in processes %}
