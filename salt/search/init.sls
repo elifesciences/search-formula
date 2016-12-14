@@ -28,7 +28,7 @@ search-repository:
 # new files and directories created inside have the www-data group
 search-cache:
     file.directory:
-        - name: /srv/search/cache
+        - name: /srv/search/var
         - user: {{ pillar.elife.webserver.username }}
         - group: {{ pillar.elife.webserver.username }}
         - dir_mode: 775
@@ -40,7 +40,7 @@ search-cache:
             - search-repository
 
     cmd.run:
-        - name: chmod -R g+s /srv/search/cache
+        - name: chmod -R g+s /srv/search/var
         - require:
             - file: search-cache
 
