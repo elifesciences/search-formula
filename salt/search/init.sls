@@ -111,7 +111,7 @@ syslog-ng-search-logs:
         - template: jinja
         - require:
             - pkg: syslog-ng
-            - composer-install
+            - search-composer-install
         - listen_in:
             - service: syslog-ng
 
