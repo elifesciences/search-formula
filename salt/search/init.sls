@@ -36,6 +36,7 @@ search-cache:
         - recurse:
             - user
             - group
+            - dir_mode
         - require:
             - search-repository
 
