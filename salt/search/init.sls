@@ -73,7 +73,11 @@ aws-credentials-cli:
 
 search-ensure-index:
     cmd.run:
+        {% if pillar.elife.env in ['prod', 'demo', 'end2end'] %}
         - name: ./bin/console search:setup --env={{ pillar.elife.env }}
+        {% else %}
+        - name: ./bin/console search:setup --delete --env={{ pillar.elife.env }}
+        {% endif %}
         - cwd: /srv/search/
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
