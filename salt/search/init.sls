@@ -84,6 +84,15 @@ search-ensure-index:
             - search-composer-install
             - aws-credentials-cli
 
+search-cache-clean:
+    cmd.run:
+        - name: ./bin/console cache:clear --env={{ pillar.elife.env }}
+        - user: {{ pillar.elife.deploy_user.username }}
+        - cwd: /srv/search
+        - require:
+            - search-cache
+            - search-composer-install
+
 {% if pillar.elife.env in ['dev', 'ci'] %}
 search-import-content:
     cmd.run:
@@ -136,3 +145,4 @@ search-{{ process }}-service:
             - aws-credentials-cli
             - search-ensure-index
 {% endfor %}
+
