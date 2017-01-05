@@ -93,6 +93,12 @@ search-cache-clean:
             - search-cache
             - search-composer-install
 
+# useful for smoke testing the JSON output
+search-jq:
+    pkg.installed:
+        - pkgs:
+            - jq
+
 {% if pillar.elife.env in ['dev', 'ci'] %}
 search-import-content:
     cmd.run:
@@ -104,6 +110,7 @@ search-import-content:
             - api-dummy-nginx-vhost-dev
             - search-ensure-index
             - search-gearman-worker-service
+            - search-jq
 {% endif %}
 
 search-nginx-vhost:
