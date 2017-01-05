@@ -100,6 +100,15 @@ search-jq:
             - jq
 
 {% if pillar.elife.env in ['dev', 'ci'] %}
+clear-gearman:
+    # TODO: revisit when Gearman is made persistent
+    cmd.run:
+        - name: sudo service gearman-job-server restart
+        - require:
+            - gearman-daemon
+{% endif %}
+
+{% if pillar.elife.env in ['dev', 'ci'] %}
 search-import-content:
     cmd.run:
         - name: ./bin/ci-import {{ pillar.elife.env }}
@@ -107,10 +116,12 @@ search-import-content:
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
             - elasticsearch
+            - clear-gearman
             - api-dummy-nginx-vhost-dev
             - search-ensure-index
             - search-gearman-worker-service
             - search-jq
+            - search-cache-clean
 {% endif %}
 
 search-nginx-vhost:
@@ -151,5 +162,6 @@ search-{{ process }}-service:
         - require:
             - aws-credentials-cli
             - search-ensure-index
+            - search-cache-clean
 {% endfor %}
 
