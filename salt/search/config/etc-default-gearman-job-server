@@ -1,0 +1,8 @@
+# This is a configuration file for /etc/init.d/gearman-job-server; it allows
+# you to perform common modifications to the behavior of the gearman-job-server
+# daemon startup without editing the init script (and thus getting prompted by
+# dpkg on upgrades).  We all love dpkg prompts.
+
+# Parameters to pass to gearmand.
+PARAMS="--listen=127.0.0.1 --libpq-conninfo 'dbname=gearman user={{ pillar.search.gearman.db.username }} password={{ pillar.search.gearman.db.password }}' --verbose=DEBUG -q Postgres"
+

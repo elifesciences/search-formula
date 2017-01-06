@@ -99,6 +99,38 @@ search-jq:
         - pkgs:
             - jq
 
+gearman-db-user:
+    postgres_user.present:
+        - name: {{ pillar.search.gearman.db.username }}
+        - encrypted: True
+        - password: {{ pillar.search.gearman.db.password }}
+        - refresh_password: True
+        - db_user: {{ pillar.elife.db_root.username }}
+        - db_password: {{ pillar.elife.db_root.password }}
+        - createdb: True
+
+gearman-db:
+    postgres_database.present:
+        - name: {{ pillar.search.gearman.db.name }}
+        - owner: {{ pillar.search.gearman.db.username }}
+        - db_user: {{ pillar.search.gearman.db.username }}
+        - db_password: {{ pillar.search.gearman.db.password }}
+        - require:
+            - postgres_user: gearman-db-user
+
+gearman-configuration:
+    file.managed:
+        - name: /etc/default/gearman-job-server
+        - source: salt://search/config/etc-default-gearman-job-server
+        - template: jinja
+        - require:
+            - gearman-daemon
+
+    cmd.run:
+        - name: sudo service gearman-job-server restart
+        - onchanges:
+            - file: gearman-configuration
+        
 {% if pillar.elife.env in ['dev', 'ci'] %}
 clear-gearman:
     # TODO: revisit when Gearman is made persistent
@@ -106,6 +138,7 @@ clear-gearman:
         - name: sudo service gearman-job-server restart
         - require:
             - gearman-daemon
+            - gearman-configuration
 {% endif %}
 
 {% if pillar.elife.env in ['dev', 'ci'] %}
