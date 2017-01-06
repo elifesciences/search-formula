@@ -4,5 +4,5 @@
 # dpkg on upgrades).  We all love dpkg prompts.
 
 # Parameters to pass to gearmand.
-PARAMS="--listen=127.0.0.1 --libpq-conninfo 'dbname=gearman user={{ pillar.search.gearman.db.username }} password={{ pillar.search.gearman.db.password }}' --verbose=DEBUG -q Postgres"
+PARAMS="--listen=127.0.0.1 --libpq-conninfo=postgres://{{ pillar.search.gearman.db.username }}:{{ pillar.search.gearman.db.password }}@127.0.0.1/{{ pillar.search.gearman.db.name }} --queue-type=Postgres --verbose=DEBUG"
 
