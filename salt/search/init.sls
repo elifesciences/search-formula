@@ -127,7 +127,10 @@ gearman-configuration:
             - gearman-daemon
 
     cmd.run:
-        - name: sudo service gearman-job-server restart
+        # I do not trust anymore Upstart to see changes to init scripts when using `restart` alone
+        - name: |
+            stop gearman-job-server
+            start gearman-job-server
         - onchanges:
             - file: gearman-configuration
         
