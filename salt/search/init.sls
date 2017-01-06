@@ -141,7 +141,7 @@ clear-gearman:
             - gearman-configuration
 {% endif %}
 
-{% if pillar.elife.env in ['dev', 'ci'] %}
+{% if pillar.elife.env in ['ci'] %}
 search-import-content:
     cmd.run:
         - name: ./bin/ci-import {{ pillar.elife.env }}
