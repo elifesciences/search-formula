@@ -5,6 +5,7 @@ base:
         - elife.nginx
         - elife.nginx-php7
         - elife.puli
+        - elife.postgresql
         - elife.gearman
         - search.java
         - search
