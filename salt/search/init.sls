@@ -144,22 +144,6 @@ clear-gearman:
             - gearman-configuration
 {% endif %}
 
-{% if pillar.elife.env in ['ci'] %}
-search-import-content:
-    cmd.run:
-        - name: ./bin/ci-import {{ pillar.elife.env }}
-        - cwd: /srv/search/
-        - user: {{ pillar.elife.deploy_user.username }}
-        - require:
-            - elasticsearch
-            - clear-gearman
-            - api-dummy-nginx-vhost-dev
-            - search-ensure-index
-            - search-gearman-worker-service
-            - search-jq
-            - search-cache-clean
-{% endif %}
-
 search-nginx-vhost:
     file.managed:
         - name: /etc/nginx/sites-enabled/search.conf
