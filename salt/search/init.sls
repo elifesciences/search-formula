@@ -185,7 +185,7 @@ clear-gearman:
             - PGPASSWORD: {{ pillar.search.gearman.db.password }}
         - name: |
             psql {{ pillar.search.gearman.db.name}} {{ pillar.search.gearman.db.username }} -e 'DELETE FROM queue'
-            name: sudo service gearman-job-server restart
+            sudo service gearman-job-server restart
         - require:
             - gearman-daemon
             - gearman-configuration
