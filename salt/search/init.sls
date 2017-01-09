@@ -182,9 +182,9 @@ search-{{ process }}-service:
 clear-gearman:
     cmd.run:
         - env:
-            - PGPASSWORD: {{ search.gearman.db.password }}
+            - PGPASSWORD: {{ pillar.search.gearman.db.password }}
         - name: |
-            psql {{ search.gearman.db.name}} {{ search.gearman.db.username }} -e 'DELETE FROM queue'
+            psql {{ pillar.search.gearman.db.name}} {{ pillar.search.gearman.db.username }} -e 'DELETE FROM queue'
         - require:
             - gearman-daemon
             - gearman-configuration
