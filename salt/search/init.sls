@@ -108,6 +108,8 @@ gearman-db-user:
         - db_user: {{ pillar.elife.db_root.username }}
         - db_password: {{ pillar.elife.db_root.password }}
         - createdb: True
+        - require:
+            - postgresql-ready
 
 gearman-db:
     postgres_database.present:
@@ -125,6 +127,7 @@ gearman-configuration:
         - template: jinja
         - require:
             - gearman-daemon
+            - gearman-db
 
     cmd.run:
         # I do not trust anymore Upstart to see changes to init scripts when using `restart` alone
@@ -134,16 +137,6 @@ gearman-configuration:
         - onchanges:
             - file: gearman-configuration
         
-{% if pillar.elife.env in ['dev', 'ci'] %}
-clear-gearman:
-    # TODO: revisit when Gearman is made persistent
-    cmd.run:
-        - name: sudo service gearman-job-server restart
-        - require:
-            - gearman-daemon
-            - gearman-configuration
-{% endif %}
-
 search-nginx-vhost:
     file.managed:
         - name: /etc/nginx/sites-enabled/search.conf
@@ -184,4 +177,22 @@ search-{{ process }}-service:
             - search-ensure-index
             - search-cache-clean
 {% endfor %}
+
+{% if pillar.elife.env in ['dev', 'ci'] %}
+clear-gearman:
+    cmd.run:
+        - env:
+            - PGPASSWORD: {{ search.gearman.db.password }}
+        - name: |
+            psql {{ search.gearman.db.name}} {{ search.gearman.db.username }} -e 'DELETE FROM queue'
+        - require:
+            - gearman-daemon
+            - gearman-configuration
+
+    # TODO: revisit when Gearman is made persistent
+    cmd.run:
+        - name: sudo service gearman-job-server restart
+        - require:
+            - cmd: clear-gearman
+{% endif %}
 
