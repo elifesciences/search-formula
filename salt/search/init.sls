@@ -47,9 +47,9 @@ search-cache:
 
 search-composer-install:
     cmd.run:
-        {% if pillar.elife.env in ['prod', 'demo', 'end2end'] %}
+        {% if pillar.elife.env in ['prod', 'demo'] %}
         - name: composer1.0 --no-interaction install --classmap-authoritative --no-dev
-        {% elif pillar.elife.env in ['ci'] %}
+        {% elif pillar.elife.env in ['ci', 'end2end'] %}
         - name: composer1.0 --no-interaction install --classmap-authoritative
         {% else %}
         - name: composer1.0 --no-interaction install
