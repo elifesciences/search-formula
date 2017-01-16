@@ -7,9 +7,13 @@ base:
         - elife.puli
         - elife.postgresql
         - elife.gearman
+        - elife.golang
+        - elife.aws-cli
+        - search.aws
+        - elife.goaws
         - search.java
         - search
-        #- search.processes
+        # - search.processes
         - api-dummy
         - search.elasticsearch
         - elife.proofreader-php

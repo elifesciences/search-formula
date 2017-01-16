@@ -1,6 +1,6 @@
 search-repository:
     builder.git_latest:
-        - name: git@github.com:elifesciences/search.git
+        - name: git@github.com:stephenwf/search.git
         - identity: {{ pillar.elife.projects_builder.key or '' }}
         - rev: {{ salt['elife.rev']() }}
         - branch: {{ salt['elife.branch']() }}
@@ -22,6 +22,17 @@ search-repository:
             - group
         - require:
             - builder: search-repository
+
+{% if pillar.elife.env in ['dev', 'ci'] %}
+search-queue-create:
+    cmd.run:
+        - name: aws sqs create-queue --region=us-east-1 --queue-name=search--{{ pillar.elife.env }} --endpoint=http://localhost:4100
+        - cwd: /home/{{ pillar.elife.deploy_user.username }}
+        - user: {{ pillar.elife.deploy_user.username }}
+        - require:
+            - search-repository
+            - aws-credentials-cli
+{% endif %}
 
 # files and directories must be readable and writable by both elife and www-data
 # they are both in the www-data group, but the g+s flag makes sure that
@@ -58,17 +69,6 @@ search-composer-install:
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
             - search-cache
-
-aws-credentials-cli:
-    file.managed:
-        - name: /home/{{ pillar.elife.deploy_user.username }}/.aws/credentials
-        - source: salt://search/config/home-user-.aws-credentials
-        - user: {{ pillar.elife.deploy_user.username }}
-        - group: {{ pillar.elife.deploy_user.username }}
-        - makedirs: True
-        - template: jinja
-        - require:
-            - deploy-user
 
 
 search-ensure-index:
@@ -136,7 +136,7 @@ gearman-configuration:
             start gearman-job-server
         - onchanges:
             - file: gearman-configuration
-        
+
 search-nginx-vhost:
     file.managed:
         - name: /etc/nginx/sites-enabled/search.conf

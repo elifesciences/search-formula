@@ -1,7 +1,7 @@
 search:
     aws:
-        access_key_id: null
-        secret_access_key: null
+        access_key_id: AKIAIOSFODNN7EXAMPLE
+        secret_access_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
         region: us-east-1
     gearman:
         db:
