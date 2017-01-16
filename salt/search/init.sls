@@ -1,6 +1,6 @@
 search-repository:
     builder.git_latest:
-        - name: git@github.com:stephenwf/search.git
+        - name: git@github.com:elifesciences/search.git
         - identity: {{ pillar.elife.projects_builder.key or '' }}
         - rev: {{ salt['elife.rev']() }}
         - branch: {{ salt['elife.branch']() }}
