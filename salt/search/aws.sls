@@ -1,4 +1,4 @@
-aws-credentials-cli:
+aws-credentials:
     file.managed:
         - name: /home/{{ pillar.elife.deploy_user.username }}/.aws/credentials
         - source: salt://search/config/home-user-.aws-credentials

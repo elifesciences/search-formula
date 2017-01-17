@@ -31,7 +31,7 @@ search-queue-create:
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
             - search-repository
-            - aws-credentials-cli
+            - aws-credentials
 {% endif %}
 
 # files and directories must be readable and writable by both elife and www-data
@@ -82,7 +82,7 @@ search-ensure-index:
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
             - search-composer-install
-            - aws-credentials-cli
+            - aws-credentials
 
 search-cache-clean:
     cmd.run:
@@ -173,7 +173,7 @@ search-{{ process }}-service:
         - source: salt://search/config/etc-init-search-{{ process }}.conf
         - template: jinja
         - require:
-            - aws-credentials-cli
+            - aws-credentials
             - search-ensure-index
             - search-cache-clean
 {% endfor %}
