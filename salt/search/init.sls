@@ -92,6 +92,7 @@ search-cache-clean:
         - require:
             - search-cache
             - search-composer-install
+            - aws-credentials
 
 # useful for smoke testing the JSON output
 search-jq:
