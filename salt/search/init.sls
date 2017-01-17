@@ -75,7 +75,7 @@ search-composer-install:
 search-console-ready:
     cmd.run:
         - name: bin/console
-        - cwd: /home/{{ pillar.elife.deploy_user.username }}
+        - cwd: /srv/search
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
             - search-composer-install
