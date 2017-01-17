@@ -77,9 +77,9 @@ search-console-ready:
         - name: bin/console
         - cwd: /home/{{ pillar.elife.deploy_user.username }}
         - user: {{ pillar.elife.deploy_user.username }}
-    - require:
-        - search-composer-install
-        - aws-credentials
+        - require:
+            - search-composer-install
+            - aws-credentials
 
 search-ensure-index:
     cmd.run:
