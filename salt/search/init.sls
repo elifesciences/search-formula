@@ -30,8 +30,10 @@ search-queue-create:
         - cwd: /home/{{ pillar.elife.deploy_user.username }}
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
-            - search-repository
+            - goaws-init
             - aws-credentials
+        - require_in:
+            - search-console-ready
 {% endif %}
 
 # files and directories must be readable and writable by both elife and www-data
@@ -70,6 +72,14 @@ search-composer-install:
         - require:
             - search-cache
 
+search-console-ready:
+    - cmd.run:
+        - name: bin/console
+        - cwd: /home/{{ pillar.elife.deploy_user.username }}
+        - user: {{ pillar.elife.deploy_user.username }}
+    - require:
+        - search-composer-install
+        - aws-credentials
 
 search-ensure-index:
     cmd.run:
@@ -81,8 +91,7 @@ search-ensure-index:
         - cwd: /srv/search/
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
-            - search-composer-install
-            - aws-credentials
+            - search-console-ready
 
 search-cache-clean:
     cmd.run:
@@ -90,9 +99,8 @@ search-cache-clean:
         - user: {{ pillar.elife.deploy_user.username }}
         - cwd: /srv/search
         - require:
+            - search-console-ready
             - search-cache
-            - search-composer-install
-            - aws-credentials
 
 # useful for smoke testing the JSON output
 search-jq:
