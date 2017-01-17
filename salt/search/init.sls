@@ -23,6 +23,17 @@ search-repository:
         - require:
             - builder: search-repository
 
+{% if pillar.elife.env in ['dev', 'ci'] %}
+search-queue-create:
+    cmd.run:
+        - name: aws sqs create-queue --region=us-east-1 --queue-name=search--{{ pillar.elife.env }} --endpoint=http://localhost:4100
+        - cwd: /home/{{ pillar.elife.deploy_user.username }}
+        - user: {{ pillar.elife.deploy_user.username }}
+        - require:
+            - search-repository
+            - aws-credentials
+{% endif %}
+
 # files and directories must be readable and writable by both elife and www-data
 # they are both in the www-data group, but the g+s flag makes sure that
 # new files and directories created inside have the www-data group
@@ -59,17 +70,6 @@ search-composer-install:
         - require:
             - search-cache
 
-aws-credentials-cli:
-    file.managed:
-        - name: /home/{{ pillar.elife.deploy_user.username }}/.aws/credentials
-        - source: salt://search/config/home-user-.aws-credentials
-        - user: {{ pillar.elife.deploy_user.username }}
-        - group: {{ pillar.elife.deploy_user.username }}
-        - makedirs: True
-        - template: jinja
-        - require:
-            - deploy-user
-
 
 search-ensure-index:
     cmd.run:
@@ -82,7 +82,7 @@ search-ensure-index:
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
             - search-composer-install
-            - aws-credentials-cli
+            - aws-credentials
 
 search-cache-clean:
     cmd.run:
@@ -136,7 +136,7 @@ gearman-configuration:
             start gearman-job-server
         - onchanges:
             - file: gearman-configuration
-        
+
 search-nginx-vhost:
     file.managed:
         - name: /etc/nginx/sites-enabled/search.conf
@@ -173,7 +173,7 @@ search-{{ process }}-service:
         - source: salt://search/config/etc-init-search-{{ process }}.conf
         - template: jinja
         - require:
-            - aws-credentials-cli
+            - aws-credentials
             - search-ensure-index
             - search-cache-clean
 {% endfor %}
