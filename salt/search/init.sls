@@ -73,7 +73,7 @@ search-composer-install:
             - search-cache
 
 search-console-ready:
-    - cmd.run:
+    cmd.run:
         - name: bin/console
         - cwd: /home/{{ pillar.elife.deploy_user.username }}
         - user: {{ pillar.elife.deploy_user.username }}
