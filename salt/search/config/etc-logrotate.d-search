@@ -1,7 +1,8 @@
-/srv/search/var/logs/*.log {
+/srv/search/var/logs/*.json {
     daily
     rotate 7
     notifempty
     missingok
     compress
+    copytruncate
 }
