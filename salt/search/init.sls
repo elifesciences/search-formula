@@ -101,6 +101,7 @@ search-ensure-index:
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
             - search-console-ready
+            - search-cache-clean
 
 # useful for smoke testing the JSON output
 search-jq:
