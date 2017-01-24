@@ -1,4 +1,5 @@
-/srv/search/var/logs/*.json {
+{% for extension in ['json', 'log'] %}
+/srv/search/var/logs/*.{{ extension }} {
     daily
     rotate 7
     notifempty
@@ -6,3 +7,4 @@
     compress
     copytruncate
 }
+{% endfor %}

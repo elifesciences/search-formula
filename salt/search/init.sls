@@ -174,6 +174,7 @@ logrotate-search-logs:
     file.managed:
         - name: /etc/logrotate.d/search
         - source: salt://search/config/etc-logrotate.d-search
+        - template: jinja
 
 {% set processes = ['gearman-worker', 'queue-watch'] %}
 {% for process in processes %}
