@@ -81,6 +81,15 @@ search-console-ready:
             - search-composer-install
             - aws-credentials
 
+search-cache-clean:
+    cmd.run:
+        - name: ./bin/console cache:clear --env={{ pillar.elife.env }}
+        - user: {{ pillar.elife.deploy_user.username }}
+        - cwd: /srv/search
+        - require:
+            - search-console-ready
+            - search-cache
+
 search-ensure-index:
     cmd.run:
         {% if pillar.elife.env in ['prod', 'demo', 'end2end'] %}
@@ -92,15 +101,6 @@ search-ensure-index:
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
             - search-console-ready
-
-search-cache-clean:
-    cmd.run:
-        - name: ./bin/console cache:clear --env={{ pillar.elife.env }}
-        - user: {{ pillar.elife.deploy_user.username }}
-        - cwd: /srv/search
-        - require:
-            - search-console-ready
-            - search-cache
 
 # useful for smoke testing the JSON output
 search-jq:
