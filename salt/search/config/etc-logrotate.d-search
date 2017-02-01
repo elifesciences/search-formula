@@ -1,4 +1,4 @@
-{% for extension in ['json', 'log'] %}
+{% for extension in ['json'] %}
 /srv/search/var/logs/*.{{ extension }} {
     daily
     rotate 7
