@@ -1,4 +1,4 @@
-{% set processes = {'search-gearman-worker': 3, 'search-queue-watch': 1} %}
+{% set processes = {'search-gearman-worker': 3, 'search-queue-watch': 3} %}
 
 {% for process, number in processes.iteritems() %}
 {{process}}-old-restart-tasks:
