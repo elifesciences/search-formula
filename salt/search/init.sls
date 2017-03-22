@@ -62,7 +62,7 @@ search-composer-install:
     cmd.run:
         {% if pillar.elife.env in ['prod', 'demo'] %}
         - name: composer1.0 --no-interaction install --classmap-authoritative --no-dev
-        {% elif pillar.elife.env in ['ci', 'end2end'] %}
+        {% elif pillar.elife.env in ['ci', 'end2end', 'continuumtest'] %}
         - name: composer1.0 --no-interaction install --classmap-authoritative
         {% else %}
         - name: composer1.0 --no-interaction install
@@ -92,7 +92,7 @@ search-cache-clean:
 
 search-ensure-index:
     cmd.run:
-        {% if pillar.elife.env in ['prod', 'demo', 'end2end'] %}
+        {% if pillar.elife.env in ['prod', 'demo', 'end2end', 'continuumtest'] %}
         - name: ./bin/console search:setup --env={{ pillar.elife.env }}
         {% else %}
         - name: ./bin/console search:setup --delete --env={{ pillar.elife.env }}
