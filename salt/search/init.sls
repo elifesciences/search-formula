@@ -11,7 +11,6 @@ search-repository:
         - fetch_pull_requests: True
         - require:
             - php-composer-1.0
-            - php-puli-latest
 
     file.directory:
         - name: /srv/search
