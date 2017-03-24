@@ -10,7 +10,7 @@ search-repository:
         - force_reset: True
         - fetch_pull_requests: True
         - require:
-            - php-composer-1.0
+            - composer
 
     file.directory:
         - name: /srv/search
@@ -60,11 +60,11 @@ search-cache:
 search-composer-install:
     cmd.run:
         {% if pillar.elife.env in ['prod', 'demo'] %}
-        - name: composer1.0 --no-interaction install --classmap-authoritative --no-dev
+        - name: composer --no-interaction install --classmap-authoritative --no-dev
         {% elif pillar.elife.env in ['ci', 'end2end', 'continuumtest'] %}
-        - name: composer1.0 --no-interaction install --classmap-authoritative
+        - name: composer --no-interaction install --classmap-authoritative
         {% else %}
-        - name: composer1.0 --no-interaction install
+        - name: composer --no-interaction install
         {% endif %}
         - cwd: /srv/search/
         - user: {{ pillar.elife.deploy_user.username }}
