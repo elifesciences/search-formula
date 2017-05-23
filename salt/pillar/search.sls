@@ -11,3 +11,4 @@ search:
 
 api_dummy:
     standalone: False
+    pinned_revision_file: /srv/search/api-dummy.sha1
