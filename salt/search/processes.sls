@@ -24,3 +24,13 @@ search-processes-start:
         - name: start search-processes
         - require:
             - search-processes-task
+
+search-gearman-worker-stop-all-task:
+    file.managed:
+        - name: /etc/init/search-gearman-worker-stop-all.conf
+        - source: salt://elife/config/etc-init-multiple-stop.conf
+        - template: jinja
+        - context:
+            processes: {{ {'search-gearman-worker': processes['search-gearman-worker']} }}
+        - require:
+            - search-processes-task
