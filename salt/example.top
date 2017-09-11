@@ -9,12 +9,13 @@ base:
         - elife.gearman
         - elife.golang
         - elife.aws-cli
-        - search.aws
         - elife.goaws
-        - search.java
-        - search
-        # - search.processes
-        - api-dummy
-        - search.elasticsearch
         - elife.proofreader-php
+        - search.elasticsearch
+        - search.aws
+        - search.java
+        - search.gearman
+        - search
+        - api-dummy # needs to be sandwiched between search and search.api-dummy
         - search.api-dummy
+        # - search.processes
