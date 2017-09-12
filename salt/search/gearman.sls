@@ -65,6 +65,6 @@ clear-gearman:
             - service: gearman-service
         - require:
             - gearman-daemon
-            - gearman-service
+            #- gearman-service # creates a recursive requisite
 {% endif %}
 
