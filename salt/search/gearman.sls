@@ -60,9 +60,9 @@ clear-gearman:
         - env:
             - PGPASSWORD: {{ pillar.search.gearman.db.password }}
         - name: |
-            psql --no-password {{ pillar.search.gearman.db.name}} {{ pillar.search.gearman.db.username }} -c 'DELETE FROM queue'
+            psql --no-password {{ pillar.search.gearman.db.name}} {{ pillar.search.gearman.db.username }} -c 'DELETE FROM queue' || { echo "'queue' table not found"; }
         - watch_in:
-            - gearman-service
+            - service: gearman-service
         - require:
             - gearman-daemon
             - gearman-service
