@@ -78,6 +78,7 @@ search-console-ready:
         - user: {{ pillar.elife.deploy_user.username }}
         - timeout: 5 # seconds
         - require:
+            - gearman-service
             - search-composer-install
             - aws-credentials
 
