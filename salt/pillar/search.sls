@@ -3,11 +3,10 @@ search:
         access_key_id: null
         secret_access_key: null
         region: us-east-1
+
+elife:
     gearman:
-        db:
-            name: gearman
-            username: gearman
-            password: gearman
+        persistent: True
 
 api_dummy:
     standalone: False

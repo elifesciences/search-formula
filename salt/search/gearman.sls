@@ -1,37 +1,4 @@
-gearman-db-user:
-    postgres_user.present:
-        - name: {{ pillar.search.gearman.db.username }}
-        - encrypted: True
-        - password: {{ pillar.search.gearman.db.password }}
-        - refresh_password: True
-        - db_user: {{ pillar.elife.db_root.username }}
-        - db_password: {{ pillar.elife.db_root.password }}
-        - createdb: True
-        - require:
-            - postgresql-ready
-
-gearman-db:
-    postgres_database.present:
-        - name: {{ pillar.search.gearman.db.name }}
-        - owner: {{ pillar.search.gearman.db.username }}
-        - db_user: {{ pillar.search.gearman.db.username }}
-        - db_password: {{ pillar.search.gearman.db.password }}
-        - require:
-            - postgres_user: gearman-db-user
-
-gearman-configuration-old:
-    file.absent:
-        - name: /etc/default/gearman-job-server
-
-gearman-configuration:
-    file.managed:
-        - name: /etc/gearman.conf
-        - source: salt://search/config/etc-gearman.conf
-        - template: jinja
-        - require:
-            - gearman-daemon
-            - gearman-db
-
+# this is to be migrated out to builder-base as well. 
 gearman-service:
     {% if salt['grains.get']('oscodename') == 'trusty' %}
     cmd.run:
@@ -41,7 +8,7 @@ gearman-service:
             start gearman-job-server
         - onchanges:
             - gearman-configuration
-            
+
     {% else %}
     service.running:
         - name: gearman-job-server
@@ -52,19 +19,7 @@ gearman-service:
             - gearman-db-user
         - watch: # restart immediately
             - gearman-configuration
+            {% if pillar.elife.env in ['dev', 'ci'] %}
+            - cmd: clear-gearman
+            {% endif %}
     {% endif %}
-
-{% if pillar.elife.env in ['dev', 'ci'] %}
-clear-gearman:
-    cmd.run:
-        - env:
-            - PGPASSWORD: {{ pillar.search.gearman.db.password }}
-        - name: |
-            psql --no-password {{ pillar.search.gearman.db.name}} {{ pillar.search.gearman.db.username }} -c 'DELETE FROM queue' || { echo "'queue' table not found"; }
-        - watch_in:
-            - service: gearman-service
-        - require:
-            - gearman-daemon
-            #- gearman-service # creates a recursive requisite
-{% endif %}
-
