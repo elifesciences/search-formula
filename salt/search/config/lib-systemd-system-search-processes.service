@@ -1,0 +1,10 @@
+[Unit]
+Description="search-processes (many)"
+After=network.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Restart=on-failure
+ExecStart=/opt/search-processes.sh
