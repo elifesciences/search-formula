@@ -40,6 +40,9 @@ search-processes-start:
         - require:
             - file: search-processes-start
             - search-processes-script
+            - aws-credentials
+            - search-ensure-index
+            - search-cache-clean
             {% for process in processes %}
             - search-{{ process }}-service
             {% endfor %}
@@ -52,17 +55,7 @@ search-processes-start:
 
 
 
-{% for process in processes %}
-search-{{ process }}-service:
-    file.managed:
-        - name: /etc/init/{{ process }}.conf
-        - source: salt://search/config/etc-init-{{ process }}.conf
-        - template: jinja
-        - require:
-            - aws-credentials
-            - search-ensure-index
-            - search-cache-clean
-{% endfor %}
+
 
 search-processes-task:
     file.managed:
@@ -80,6 +73,9 @@ search-processes-start:
     cmd.run:
         - name: start search-processes
         - require:
+            - aws-credentials
+            - search-ensure-index
+            - search-cache-clean
             - search-processes-task
 
 search-gearman-worker-stop-all-task:

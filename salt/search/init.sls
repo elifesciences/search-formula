@@ -138,3 +138,17 @@ logrotate-search-logs:
         - name: /etc/logrotate.d/search
         - source: salt://search/config/etc-logrotate.d-search
         - template: jinja
+
+{% for process in ['search-gearman-worker', 'search-queue-watch'] %}
+search-{{ process }}-service:
+    file.managed:
+        {% if salt['grains.get']('oscodename') == 'xenial' %}
+        - name: /lib/systemd/system/{{ process }}@.service
+        - source: salt://search/config/lib-systemd-system-{{ process }}@.service
+        {% else %}
+        - name: /etc/init/{{ process }}.conf
+        - source: salt://search/config/etc-init-{{ process }}.conf
+        {% endif %}
+        - template: jinja
+{% endfor %}
+
