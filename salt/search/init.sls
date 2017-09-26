@@ -32,7 +32,7 @@ search-queue-create:
             - goaws-init
             - aws-credentials
         - require_in:
-            - search-console-ready
+            - cmd: search-console-ready
 {% endif %}
 
 # files and directories must be readable and writable by both elife and www-data
