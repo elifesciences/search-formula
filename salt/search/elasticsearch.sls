@@ -45,3 +45,5 @@ elasticsearch-config:
         - group: elasticsearch
         - mode: 644
         - template: jinja
+        - require:
+            - pkg: elasticsearch
