@@ -34,7 +34,7 @@ elasticsearch:
         - require:
             - pkg: oracle-java8-installer
             - pkg: elasticsearch
-            - file: /etc/elasticsearch/elasticsearch.yml
+            - file: elasticsearch-config
             - group: elasticsearch
 
 elasticsearch-config:
