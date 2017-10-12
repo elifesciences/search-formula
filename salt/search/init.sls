@@ -77,6 +77,7 @@ search-console-ready:
         - cwd: /srv/search
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
+            - elasticsearch
             - search-composer-install
             - aws-credentials
 
