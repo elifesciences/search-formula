@@ -47,3 +47,10 @@ elasticsearch-config:
         - template: jinja
         - require:
             - pkg: elasticsearch
+
+elasticsearch-ready:
+    cmd.run:
+        - name: |
+            timeout 60 sh -c 'while ! nc -q0 -w1 -z localhost 9200 </dev/null >/dev/null 2>&1; do sleep 1; done'
+        - require:
+            - elasticsearch
