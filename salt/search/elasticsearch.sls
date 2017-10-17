@@ -34,7 +34,7 @@ elasticsearch:
         - require:
             - pkg: oracle-java8-installer
             - pkg: elasticsearch
-            - file: /etc/elasticsearch/elasticsearch.yml
+            - file: elasticsearch-config
             - group: elasticsearch
 
 elasticsearch-config:
@@ -45,3 +45,12 @@ elasticsearch-config:
         - group: elasticsearch
         - mode: 644
         - template: jinja
+        - require:
+            - pkg: elasticsearch
+
+elasticsearch-ready:
+    cmd.run:
+        - name: |
+            timeout 60 sh -c 'while ! nc -q0 -w1 -z localhost 9200 </dev/null >/dev/null 2>&1; do sleep 1; done'
+        - require:
+            - elasticsearch
