@@ -13,7 +13,7 @@ base:
         - elife.goaws
         - search.java
         - search
-        - search.processes
+        #- search.processes
         - api-dummy
         - search.elasticsearch
         - elife.proofreader-php
