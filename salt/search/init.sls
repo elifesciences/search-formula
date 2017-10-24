@@ -29,7 +29,7 @@ search-queue-create:
         - cwd: /home/{{ pillar.elife.deploy_user.username }}
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
-            - goaws-init
+            - goaws
             - aws-credentials
         - require_in:
             - cmd: search-console-ready

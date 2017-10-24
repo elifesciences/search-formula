@@ -7,14 +7,15 @@ base:
         - elife.nginx-php7
         - elife.postgresql
         - elife.gearman
-        - elife.golang
         - elife.aws-cli
         - search.aws
-        - elife.goaws
         - elife.java8
+        - search.elasticsearch
         - search
         - search.processes
-        - api-dummy
-        - search.elasticsearch
+        # for testing
         - elife.proofreader-php
+        - api-dummy
         - search.api-dummy
+        - elife.docker
+        - elife.goaws
