@@ -24,6 +24,7 @@ search-repository:
         - require:
             - builder: search-repository
 
+{% if leader %}
 {% if pillar.elife.env in ['dev', 'ci'] %}
 search-queue-create:
     cmd.run:
@@ -35,6 +36,7 @@ search-queue-create:
             - aws-credentials-deploy-user
         - require_in:
             - cmd: search-console-ready
+{% endif %}
 {% endif %}
 
 # files and directories must be readable and writable by both elife and www-data
@@ -187,10 +189,10 @@ search-{{ process }}-service:
         - template: jinja
         - require:
             - aws-credentials-deploy-user
-            - search-ensure-index
             - search-cache-clean
 {% endfor %}
 
+{% if leader %}
 {% if pillar.elife.env in ['dev', 'ci'] %}
 clear-gearman:
     cmd.run:
@@ -202,5 +204,6 @@ clear-gearman:
         - require:
             - gearman-daemon
             - gearman-configuration
+{% endif %}
 {% endif %}
 
