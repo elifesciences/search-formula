@@ -117,6 +117,7 @@ search-jq:
         - pkgs:
             - jq
 
+{% if leader %}
 gearman-db-user:
     postgres_user.present:
         - name: {{ pillar.search.gearman.db.username }}
@@ -154,6 +155,7 @@ gearman-configuration:
             start gearman-job-server
         - onchanges:
             - file: gearman-configuration
+{% endif %}
 
 search-nginx-vhost:
     file.managed:
