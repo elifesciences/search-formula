@@ -7,8 +7,8 @@ base:
         - elife.nginx-php7
         - elife.postgresql
         - elife.gearman
+        - elife.aws-credentials
         - elife.aws-cli
-        - search.aws
         - elife.java8
         - search.elasticsearch
         - search
