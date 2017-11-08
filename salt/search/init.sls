@@ -96,6 +96,7 @@ search-cache-clean:
             - search-console-ready
             - search-cache
 
+{% if leader %}
 search-ensure-index:
     cmd.run:
         {% if pillar.elife.env in ['prod', 'demo', 'end2end', 'continuumtest'] %}
@@ -108,6 +109,7 @@ search-ensure-index:
         - require:
             - search-console-ready
             - search-cache-clean
+{% endif %}
 
 # useful for smoke testing the JSON output
 search-jq:
