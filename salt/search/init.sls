@@ -30,7 +30,7 @@ search-queue-create:
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
             - goaws
-            - aws-credentials
+            - aws-credentials-deploy-user
         - require_in:
             - cmd: search-console-ready
 {% endif %}
@@ -79,7 +79,7 @@ search-console-ready:
         - require:
             - elasticsearch-ready
             - search-composer-install
-            - aws-credentials
+            - aws-credentials-deploy-user
 
 search-cache-clean:
     cmd.run:
@@ -184,7 +184,7 @@ search-{{ process }}-service:
         - source: salt://search/config/etc-init-search-{{ process }}.conf
         - template: jinja
         - require:
-            - aws-credentials
+            - aws-credentials-deploy-user
             - search-ensure-index
             - search-cache-clean
 {% endfor %}
