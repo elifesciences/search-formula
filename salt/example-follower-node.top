@@ -1,0 +1,11 @@
+base:
+    '*':
+        - elife
+        - elife.php7
+        - elife.composer
+        - elife.nginx
+        - elife.nginx-php7
+        - elife.aws-credentials
+        - elife.aws-cli
+        - search
+        - search.processes
