@@ -1,3 +1,5 @@
+{% set leader = salt['elife.cfg']('project.node', 1) == 1 %}
+
 search-repository:
     builder.git_latest:
         - name: git@github.com:elifesciences/search.git
