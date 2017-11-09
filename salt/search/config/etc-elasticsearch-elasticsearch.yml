@@ -4,3 +4,4 @@
 node.name: "{{ salt['elife.cfg']('project.stackname') }}"
 http.cors.allow-origin: "/.*/"
 http.cors.enabled: true
+network.host: {{ salt['elife.cfg']('cfn.outputs.PrivateIP') }}
