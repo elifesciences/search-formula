@@ -1,3 +1,5 @@
+{% set leader = salt['elife.cfg']('project.node', 1) == 1 %}
+
 search-repository:
     builder.git_latest:
         - name: git@github.com:elifesciences/search.git
@@ -22,6 +24,7 @@ search-repository:
         - require:
             - builder: search-repository
 
+{% if leader %}
 {% if pillar.elife.env in ['dev', 'ci'] %}
 search-queue-create:
     cmd.run:
@@ -33,6 +36,7 @@ search-queue-create:
             - aws-credentials-deploy-user
         - require_in:
             - cmd: search-console-ready
+{% endif %}
 {% endif %}
 
 # files and directories must be readable and writable by both elife and www-data
@@ -77,7 +81,10 @@ search-console-ready:
         - cwd: /srv/search
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
+        {% if leader %}
             - elasticsearch-ready
+            - gearman-configuration
+        {% endif %}
             - search-composer-install
             - aws-credentials-deploy-user
 
@@ -90,6 +97,7 @@ search-cache-clean:
             - search-console-ready
             - search-cache
 
+{% if leader %}
 search-ensure-index:
     cmd.run:
         {% if pillar.elife.env in ['prod', 'demo', 'end2end', 'continuumtest'] %}
@@ -102,50 +110,15 @@ search-ensure-index:
         - require:
             - search-console-ready
             - search-cache-clean
+        - require_in:
+            - file: search-nginx-vhost
+{% endif %}
 
 # useful for smoke testing the JSON output
 search-jq:
     pkg.installed:
         - pkgs:
             - jq
-
-gearman-db-user:
-    postgres_user.present:
-        - name: {{ pillar.search.gearman.db.username }}
-        - encrypted: True
-        - password: {{ pillar.search.gearman.db.password }}
-        - refresh_password: True
-        - db_user: {{ pillar.elife.db_root.username }}
-        - db_password: {{ pillar.elife.db_root.password }}
-        - createdb: True
-        - require:
-            - postgresql-ready
-
-gearman-db:
-    postgres_database.present:
-        - name: {{ pillar.search.gearman.db.name }}
-        - owner: {{ pillar.search.gearman.db.username }}
-        - db_user: {{ pillar.search.gearman.db.username }}
-        - db_password: {{ pillar.search.gearman.db.password }}
-        - require:
-            - postgres_user: gearman-db-user
-
-gearman-configuration:
-    file.managed:
-        - name: /etc/default/gearman-job-server
-        - source: salt://search/config/etc-default-gearman-job-server
-        - template: jinja
-        - require:
-            - gearman-daemon
-            - gearman-db
-
-    cmd.run:
-        # I do not trust anymore Upstart to see changes to init scripts when using `restart` alone
-        - name: |
-            stop gearman-job-server
-            start gearman-job-server
-        - onchanges:
-            - file: gearman-configuration
 
 search-nginx-vhost:
     file.managed:
@@ -155,6 +128,7 @@ search-nginx-vhost:
         - require:
             - nginx-config
             - search-composer-install
+            # see also: search-ensure-index
         - listen_in:
             - service: nginx-server-service
             - service: php-fpm
@@ -185,20 +159,6 @@ search-{{ process }}-service:
         - template: jinja
         - require:
             - aws-credentials-deploy-user
-            - search-ensure-index
             - search-cache-clean
 {% endfor %}
-
-{% if pillar.elife.env in ['dev', 'ci'] %}
-clear-gearman:
-    cmd.run:
-        - env:
-            - PGPASSWORD: {{ pillar.search.gearman.db.password }}
-        - name: |
-            psql --no-password {{ pillar.search.gearman.db.name}} {{ pillar.search.gearman.db.username }} -c 'DELETE FROM queue'
-            sudo service gearman-job-server restart
-        - require:
-            - gearman-daemon
-            - gearman-configuration
-{% endif %}
 
