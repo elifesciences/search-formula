@@ -47,6 +47,8 @@ elasticsearch-config:
         - template: jinja
         - require:
             - pkg: elasticsearch
+        - watch_in:
+            - service: elasticsearch
 
 elasticsearch-ready:
     cmd.run:
