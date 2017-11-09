@@ -11,6 +11,7 @@ base:
         - elife.aws-cli
         - elife.java8
         - search.elasticsearch
+        - search.gearman-persistence
         - search
         - search.processes
         # for testing
