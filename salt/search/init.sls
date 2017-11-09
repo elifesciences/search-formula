@@ -110,6 +110,8 @@ search-ensure-index:
         - require:
             - search-console-ready
             - search-cache-clean
+        - require_in:
+            - file: search-nginx-vhost
 {% endif %}
 
 # useful for smoke testing the JSON output
@@ -126,6 +128,7 @@ search-nginx-vhost:
         - require:
             - nginx-config
             - search-composer-install
+            # see also: search-ensure-index
         - listen_in:
             - service: nginx-server-service
             - service: php-fpm
