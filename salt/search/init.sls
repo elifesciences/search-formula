@@ -100,11 +100,14 @@ search-cache-clean:
 {% if leader %}
 search-ensure-index:
     cmd.run:
+        - name: |
         {% if pillar.elife.env in ['prod', 'demo', 'end2end', 'continuumtest'] %}
-        - name: ./bin/console search:setup --env={{ pillar.elife.env }}
+            ./bin/console search:setup --env={{ pillar.elife.env }}
         {% else %}
-        - name: ./bin/console search:setup --delete --env={{ pillar.elife.env }}
+            ./bin/console search:setup --delete --env={{ pillar.elife.env }}
         {% endif %}
+            # TODO: add --delete support ans use it in dev/ci
+            ./bin/console keyvalue:setup --env={{ pillar.elife.env }}
         - cwd: /srv/search/
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
