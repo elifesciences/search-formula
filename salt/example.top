@@ -13,7 +13,8 @@ base:
         - search.elasticsearch
         - search.gearman-persistence
         - search
-        - search.processes
+        # on end2end, continuumtest, prod:
+        #- search.processes
         # for testing
         - elife.proofreader-php
         - api-dummy
