@@ -59,7 +59,7 @@ elasticsearch-logging-config:
         - mode: 644
         - template: jinja
         - require:
-            - elasticsearch
+            - pkg: elasticsearch
         - watch_in:
             - service: elasticsearch
 
