@@ -50,6 +50,19 @@ elasticsearch-config:
         - watch_in:
             - service: elasticsearch
 
+elasticsearch-logging-config:
+    file.managed:
+        - name: /etc/elasticsearch/logging.yml
+        - source: salt://search/config/etc-elasticsearch-logging.yml
+        - user: elasticsearch
+        - group: elasticsearch
+        - mode: 644
+        - template: jinja
+        - require:
+            - elasticsearch
+        - watch_in:
+            - service: elasticsearch
+
 elasticsearch-ready:
     cmd.run:
         - name: wait_for_port 9200 60
