@@ -9,7 +9,7 @@ base:
         - elife.gearman
         - elife.aws-credentials
         - elife.aws-cli
-        - elife.java8
+        - elife.openjdk8
         - search.elasticsearch
         - search.gearman-persistence
         - search
