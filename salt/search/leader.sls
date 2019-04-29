@@ -11,6 +11,15 @@ search-queue-create:
             - cmd: search-console-ready
 {% endif %}
 
+search-console-ready:
+    cmd.run:
+        - name: ./bin/console --env={{ pillar.elife.env }}
+        - cwd: /srv/search
+        - user: {{ pillar.elife.deploy_user.username }}
+        - require:
+            - search-composer-install
+            - aws-credentials-deploy-user
+
 search-ensure-index:
     cmd.run:
         - name: |

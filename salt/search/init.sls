@@ -60,22 +60,12 @@ search-composer-install:
         - require:
             - search-cache
 
-search-console-ready:
-    cmd.run:
-        - name: ./bin/console --env={{ pillar.elife.env }}
-        - cwd: /srv/search
-        - user: {{ pillar.elife.deploy_user.username }}
-        - require:
-            - search-composer-install
-            - aws-credentials-deploy-user
-
 search-cache-clean:
     cmd.run:
-        - name: ./bin/console cache:clear --env={{ pillar.elife.env }}
+        - name: rm -rf var/cache/*
         - user: {{ pillar.elife.deploy_user.username }}
         - cwd: /srv/search
         - require:
-            - search-console-ready
             - search-cache
 
 # useful for smoke testing the JSON output
