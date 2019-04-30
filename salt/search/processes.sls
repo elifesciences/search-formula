@@ -20,10 +20,12 @@ search-processes-task:
             {% endfor %}
 
 search-processes-start:
-    cmd.run:
-        - name: start search-processes
+    service.running:
+        - name: search-processes
         - require:
             - search-processes-task
+        - watch:
+            - aws-credentials-deploy-user
 
 search-gearman-worker-stop-all-task:
     file.managed:
