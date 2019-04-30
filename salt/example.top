@@ -13,6 +13,7 @@ base:
         - search.elasticsearch
         - search.gearman-persistence
         - search
+        - search.leader
         # on end2end, continuumtest, prod:
         #- search.processes
         # for testing

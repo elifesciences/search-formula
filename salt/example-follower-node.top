@@ -9,4 +9,3 @@ base:
         - elife.aws-credentials
         - elife.aws-cli
         - search
-        - search.processes
