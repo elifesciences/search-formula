@@ -7,15 +7,18 @@ base:
         - elife.nginx-php7
         - elife.postgresql
         - elife.gearman
-        - elife.golang
+        - elife.aws-credentials
         - elife.aws-cli
-        - elife.goaws
-        - elife.proofreader-php
+        - elife.openjdk8
         - search.elasticsearch
-        - search.aws
-        - search.java
-        - search.gearman
+        - search.gearman-persistence
         - search
-        - api-dummy # needs to be sandwiched between search and search.api-dummy
+        - search.leader
+        # on end2end, continuumtest, prod:
+        #- search.processes
+        # for testing
+        - elife.proofreader-php
+        - api-dummy
         - search.api-dummy
-        # - search.processes
+        - elife.docker
+        - elife.goaws

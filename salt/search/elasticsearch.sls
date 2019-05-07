@@ -25,16 +25,16 @@ elasticsearch:
         - refresh: True
         - version: 2.4.0
         - require:
-            - pkg: oracle-java8-installer
+            - oracle-java8-installer
             - pkgrepo: elasticsearch-repo
 
     service:
         - running
         - enable: True
         - require:
-            - pkg: oracle-java8-installer
+            - oracle-java8-installer
             - pkg: elasticsearch
-            - file: /etc/elasticsearch/elasticsearch.yml
+            - file: elasticsearch-config
             - group: elasticsearch
 
 elasticsearch-config:
@@ -45,3 +45,27 @@ elasticsearch-config:
         - group: elasticsearch
         - mode: 644
         - template: jinja
+        - require:
+            - pkg: elasticsearch
+        - watch_in:
+            - service: elasticsearch
+
+elasticsearch-logging-config:
+    file.managed:
+        - name: /etc/elasticsearch/logging.yml
+        - source: salt://search/config/etc-elasticsearch-logging.yml
+        - user: elasticsearch
+        - group: elasticsearch
+        - mode: 644
+        - template: jinja
+        - require:
+            - pkg: elasticsearch
+        - watch_in:
+            - service: elasticsearch
+
+elasticsearch-ready:
+    cmd.run:
+        - name: wait_for_port 9200 60
+        - user: {{ pillar.elife.deploy_user.username }}
+        - require:
+            - elasticsearch

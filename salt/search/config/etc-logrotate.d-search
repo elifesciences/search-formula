@@ -1,5 +1,6 @@
 {% for extension in ['json'] %}
 /srv/search/var/logs/*.{{ extension }} {
+    su www-data www-data
     daily
     rotate 7
     notifempty
@@ -8,3 +9,13 @@
     copytruncate
 }
 {% endfor %}
+
+/var/log/elasticsearch/elasticsearch.log {
+    su elasticsearch elasticsearch
+    daily
+    rotate 7
+    notifempty
+    missingok
+    compress
+    copytruncate
+}

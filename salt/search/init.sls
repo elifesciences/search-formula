@@ -1,3 +1,5 @@
+{% set leader = salt['elife.cfg']('project.node', 1) == 1 %}
+
 search-repository:
     builder.git_latest:
         - name: git@github.com:elifesciences/search.git
@@ -21,19 +23,6 @@ search-repository:
             - group
         - require:
             - builder: search-repository
-
-{% if pillar.elife.env in ['dev', 'ci'] %}
-search-queue-create:
-    cmd.run:
-        - name: aws sqs create-queue --region=us-east-1 --queue-name=search--{{ pillar.elife.env }} --endpoint=http://localhost:4100
-        - cwd: /home/{{ pillar.elife.deploy_user.username }}
-        - user: {{ pillar.elife.deploy_user.username }}
-        - require:
-            - goaws-init
-            - aws-credentials
-        - require_in:
-            - search-console-ready
-{% endif %}
 
 # files and directories must be readable and writable by both elife and www-data
 # they are both in the www-data group, but the g+s flag makes sure that
@@ -71,38 +60,13 @@ search-composer-install:
         - require:
             - search-cache
 
-search-console-ready:
-    cmd.run:
-        - name: ./bin/console --env={{ pillar.elife.env }}
-        - cwd: /srv/search
-        - user: {{ pillar.elife.deploy_user.username }}
-        - timeout: 5 # seconds
-        - require:
-            - gearman-service
-            - search-composer-install
-            - aws-credentials
-
 search-cache-clean:
     cmd.run:
-        - name: ./bin/console cache:clear --env={{ pillar.elife.env }}
+        - name: rm -rf var/cache/*
         - user: {{ pillar.elife.deploy_user.username }}
         - cwd: /srv/search
         - require:
-            - search-console-ready
             - search-cache
-
-search-ensure-index:
-    cmd.run:
-        {% if pillar.elife.env in ['prod', 'demo', 'end2end', 'continuumtest'] %}
-        - name: ./bin/console search:setup --env={{ pillar.elife.env }}
-        {% else %}
-        - name: ./bin/console search:setup --delete --env={{ pillar.elife.env }}
-        {% endif %}
-        - cwd: /srv/search/
-        - user: {{ pillar.elife.deploy_user.username }}
-        - require:
-            - search-console-ready
-            - search-cache-clean
 
 # useful for smoke testing the JSON output
 search-jq:
@@ -118,6 +82,7 @@ search-nginx-vhost:
         - require:
             - nginx-config
             - search-composer-install
+            # see also: search-ensure-index
         - listen_in:
             - service: nginx-server-service
             - service: php-fpm
@@ -147,8 +112,11 @@ search-{{ process }}-service:
         - source: salt://search/config/lib-systemd-system-{{ process }}@.service
         {% else %}
         - name: /etc/init/{{ process }}.conf
-        - source: salt://search/config/etc-init-{{ process }}.conf
+        - source: salt://search/config/etc-init-search-{{ process }}.conf
         {% endif %}
         - template: jinja
+        - require:
+            - aws-credentials-deploy-user
+            - search-cache-clean
 {% endfor %}
 
