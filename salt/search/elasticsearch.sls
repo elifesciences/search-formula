@@ -63,6 +63,14 @@ elasticsearch-logging-config:
         - watch_in:
             - service: elasticsearch
 
+elasticsearch-logrotate:
+    file.managed:
+        - name: /etc/logrotate.d/elasticsearch
+        - source: salt://search/config/etc-logrotate.d-elasticsearch
+        - template: jinja
+        - requires:
+            - user: elasticsearch
+
 elasticsearch-ready:
     cmd.run:
         - name: wait_for_port 9200 60
