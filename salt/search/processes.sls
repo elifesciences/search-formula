@@ -1,14 +1,23 @@
+{% if salt['grains.get']('osrelease') == '14.04' %}
+
 {% set processes = {'search-gearman-worker': 3, 'search-queue-watch': 3} %}
 
-{% for process, number in processes.iteritems() %}
-{{process}}-old-restart-tasks:
+{% for process in processes %}
+{{ process }}-old-restart-tasks:
     file.absent:
         - name: /etc/init/{{ process }}s.conf
+
+{{ process }}-service:
+    file.managed:
+        - name: /etc/init/{{ process }}.conf
+        - source: salt://search/config/etc-init-search-{{ process }}.conf
+        - template: jinja
+        - require:
+            - aws-credentials-deploy-user
+            - search-cache-clean
+        - require_in:
+            - search-processes-task
 {% endfor %}
-
-
-
-{% if salt['grains.get']('osrelease') == '14.04' %}
 
 search-processes-task:
     file.managed:
@@ -17,10 +26,6 @@ search-processes-task:
         - template: jinja
         - context:
             processes: {{ processes }}
-        - require:
-            {% for process in processes %}
-            - file: search-{{ process }}-service
-            {% endfor %}
 
 search-processes-start:
     cmd.run:
@@ -47,45 +52,16 @@ search-gearman-worker-stop-all-task:
 
 {% else %}
 
+# 16.04+
 
-
-
-
-{% for process in processes %}
-search-{{ process }}-service:
+{% for process in pillar.elife.multiservice.services %}
+{{ process }}-service:
     file.managed:
         - name: /lib/systemd/system/{{ process }}@.service
         - source: salt://search/config/lib-systemd-system-{{ process }}@.service
         - template: jinja
-{% endfor %}
-
-# manages many search-process services
-search-processes-script:
-    file.managed:
-        - name: /opt/search-processes.sh
-        - source: salt://elife/templates/systemd-multiple-processes-parallel.sh
-        - template: jinja
-        - mode: 740
         - context:
-            processes: {{ processes }}
-
-# this is a service that calls the script at /opt/search-processes.sh
-# that script in turn calls a templated service N times
-search-processes-start:
-    file.managed:
-        - name: /lib/systemd/system/search-processes.service
-        - source: salt://search/config/lib-systemd-system-search-processes.service
-
-    service.running:
-        - name: search-processes
-        - require:
-            - file: search-processes-start
-            - search-processes-script
-            - aws-credentials
-            - search-ensure-index
-            - search-cache-clean
-            {% for process in processes %}
-            - search-{{ process }}-service
-            {% endfor %}
+            process: {{ process }}
+{% endfor %}
 
 {% endif %}

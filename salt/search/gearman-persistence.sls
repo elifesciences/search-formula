@@ -1,8 +1,8 @@
 # requires elife.postgresql, elife.gearman
 
 {% set osrelease = salt['grains.get']('osrelease') %}
-
 {% set leader = salt['elife.cfg']('project.node', 1) == 1 %}
+
 {% if leader %}
 gearman-db-user:
     postgres_user.present:
@@ -31,25 +31,31 @@ gearman-configuration:
         - source: salt://search/config/etc-default-gearman-job-server
         - template: jinja
         - require:
-            - gearman-daemon
+            - gearman-daemon # elife.gearman-server.sls
             - gearman-db
-        {% if osrelease != "14.04" %}
-        - watch_in:
-            - service: gearman-job-server
-        {% endif %}
 
-    {% if osrelease == "14.04" %}
+gearman-service:
+    {% if salt['grains.get']('osrelease') == '14.04' %}
     cmd.run:
         # I do not trust anymore Upstart to see changes to init scripts when using `restart` alone
         - name: |
             stop gearman-job-server
             start gearman-job-server
         - onchanges:
-            - file: gearman-configuration
-    {% endif %}
-{% endif %}
+            - gearman-configuration
 
-{% if leader %}
+    {% else %}
+    service.running:
+        - name: gearman-job-server
+        - enable: True
+        - require:
+            - postgresql-ready
+            - gearman-db
+            - gearman-db-user
+        - watch: # restart immediately
+            - gearman-configuration
+    {% endif %}
+
 {% if pillar.elife.env in ['dev', 'ci'] %}
 clear-gearman:
     cmd.run:
@@ -61,6 +67,9 @@ clear-gearman:
         - require:
             - gearman-daemon
             - gearman-configuration
-{% endif %}
-{% endif %}
+            - gearman-service
+        - watch_in:
+            - service: gearman-service
 
+{% endif %} # end dev/ci
+{% endif %} # end leader
