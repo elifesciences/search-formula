@@ -35,7 +35,7 @@ gearman-configuration:
             - gearman-db
 
 gearman-service:
-    {% if salt['grains.get']('osrelease') == '14.04' %}
+    {% if osrelease == '14.04' %}
     cmd.run:
         # I do not trust anymore Upstart to see changes to init scripts when using `restart` alone
         - name: |
@@ -50,10 +50,10 @@ gearman-service:
         - enable: True
         - require:
             - postgresql-ready
-            - gearman-db
-            - gearman-db-user
-        - watch: # restart immediately
             - gearman-configuration
+            - gearman-db
+        - watch: # restart immediately
+            - file: gearman-configuration
     {% endif %}
 
 {% if pillar.elife.env in ['dev', 'ci'] %}
@@ -63,13 +63,10 @@ clear-gearman:
             - PGPASSWORD: {{ pillar.search.gearman.db.password }}
         - name: |
             psql --no-password {{ pillar.search.gearman.db.name}} {{ pillar.search.gearman.db.username }} -c 'DELETE FROM queue'
-            sudo service gearman-job-server restart
+            service gearman-job-server restart || systemctl restart gearman-job-server || { echo "failed to restart gearman-job-server"; exit 1 }
         - require:
             - gearman-daemon
             - gearman-configuration
-            - gearman-service
-        - watch_in:
-            - service: gearman-service
 
 {% endif %} # end dev/ci
 {% endif %} # end leader
