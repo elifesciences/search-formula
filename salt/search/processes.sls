@@ -8,7 +8,48 @@
 
 
 
-{% if salt['grains.get']('oscodename') == 'xenial' %}
+{% if salt['grains.get']('osrelease') == '14.04' %}
+
+search-processes-task:
+    file.managed:
+        - name: /etc/init/search-processes.conf
+        - source: salt://elife/config/etc-init-multiple-processes-parallel.conf
+        - template: jinja
+        - context:
+            processes: {{ processes }}
+        - require:
+            {% for process in processes %}
+            - file: search-{{ process }}-service
+            {% endfor %}
+
+search-processes-start:
+    cmd.run:
+        - name: start search-processes
+        - require:
+            - aws-credentials
+            - search-ensure-index
+            - search-cache-clean
+            - search-processes-task
+
+search-gearman-worker-stop-all-task:
+    file.managed:
+        - name: /etc/init/search-gearman-worker-stop-all.conf
+        - source: salt://elife/config/etc-init-multiple-stop.conf
+        - template: jinja
+        - context:
+            processes: {{ {'search-gearman-worker': processes['search-gearman-worker']} }}
+        - require:
+            - search-processes-task
+
+
+
+
+
+{% else %}
+
+
+
+
 
 {% for process in processes %}
 search-{{ process }}-service:
@@ -46,46 +87,5 @@ search-processes-start:
             {% for process in processes %}
             - search-{{ process }}-service
             {% endfor %}
-
-
-
-
-{% else %}
-
-
-
-
-
-
-search-processes-task:
-    file.managed:
-        - name: /etc/init/search-processes.conf
-        - source: salt://elife/config/etc-init-multiple-processes-parallel.conf
-        - template: jinja
-        - context:
-            processes: {{ processes }}
-        - require:
-            {% for process in processes %}
-            - file: search-{{ process }}-service
-            {% endfor %}
-
-search-processes-start:
-    cmd.run:
-        - name: start search-processes
-        - require:
-            - aws-credentials
-            - search-ensure-index
-            - search-cache-clean
-            - search-processes-task
-
-search-gearman-worker-stop-all-task:
-    file.managed:
-        - name: /etc/init/search-gearman-worker-stop-all.conf
-        - source: salt://elife/config/etc-init-multiple-stop.conf
-        - template: jinja
-        - context:
-            processes: {{ {'search-gearman-worker': processes['search-gearman-worker']} }}
-        - require:
-            - search-processes-task
 
 {% endif %}
