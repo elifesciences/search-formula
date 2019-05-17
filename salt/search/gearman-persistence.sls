@@ -1,5 +1,7 @@
 # requires elife.postgresql, elife.gearman
 
+{% set osrelease = salt['grains.get']('osrelease') %}
+
 {% set leader = salt['elife.cfg']('project.node', 1) == 1 %}
 {% if leader %}
 gearman-db-user:
@@ -31,7 +33,12 @@ gearman-configuration:
         - require:
             - gearman-daemon
             - gearman-db
+        {% if osrelease != "14.04" %}
+        - watch_in:
+            - service: gearman-job-server
+        {% endif %}
 
+    {% if osrelease == "14.04" %}
     cmd.run:
         # I do not trust anymore Upstart to see changes to init scripts when using `restart` alone
         - name: |
@@ -39,6 +46,7 @@ gearman-configuration:
             start gearman-job-server
         - onchanges:
             - file: gearman-configuration
+    {% endif %}
 {% endif %}
 
 {% if leader %}

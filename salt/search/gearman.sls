@@ -1,6 +1,6 @@
 # this is to be migrated out to builder-base as well. 
 gearman-service:
-    {% if salt['grains.get']('oscodename') == 'trusty' %}
+    {% if salt['grains.get']('osrelease') == '14.04' %}
     cmd.run:
         # I do not trust anymore Upstart to see changes to init scripts when using `restart` alone
         - name: |
