@@ -13,4 +13,4 @@ TimeoutStopSec=70
 User={{ pillar.elife.deploy_user.username }}
 Environment="HOME=/home/{{ pillar.elife.deploy_user.username }}"
 WorkingDirectory=/srv/search
-ExecStart=/usr/bin/php bin/console queue:watch -e {{ pillar.elife.env }} $I
+ExecStart=/usr/bin/php bin/console queue:watch -e {{ pillar.elife.env }} %I
