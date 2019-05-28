@@ -25,6 +25,7 @@ gearman-db:
         - require:
             - postgres_user: gearman-db-user
 
+# 14.04 Upstart only.
 gearman-configuration:
     file.managed:
         - name: /etc/default/gearman-job-server
@@ -45,15 +46,21 @@ gearman-service:
             - gearman-configuration
 
     {% else %}
+
+    file.managed:
+        - name: /lib/systemd/system/gearman-job-server.service
+        - source: salt://search/config/lib-systemd-system-gearman-job-server.service
+        - template: jinja
+
     service.running:
         - name: gearman-job-server
         - enable: True
         - require:
             - postgresql-ready
-            - gearman-configuration
             - gearman-db
-        - watch: # restart immediately
-            - file: gearman-configuration
+            - file: gearman-service
+        - watch:
+            - file: gearman-service
     {% endif %}
 
 {% if pillar.elife.env in ['dev', 'ci'] %}
@@ -62,7 +69,7 @@ clear-gearman:
         - env:
             - PGPASSWORD: {{ pillar.search.gearman.db.password }}
         - name: |
-            psql --no-password {{ pillar.search.gearman.db.name}} {{ pillar.search.gearman.db.username }} -c 'DELETE FROM queue'
+            psql --no-password -U {{ pillar.search.gearman.db.username }} {{ pillar.search.gearman.db.name}} -c 'DELETE FROM queue'
             service gearman-job-server restart || systemctl restart gearman-job-server || { echo "failed to restart gearman-job-server"; exit 1 }
         - require:
             - gearman-daemon

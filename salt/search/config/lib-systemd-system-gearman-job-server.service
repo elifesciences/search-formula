@@ -7,7 +7,13 @@ PermissionsStartOnly=true
 User=gearman
 Restart=always
 PIDFile=/run/gearman/server.pid
-ExecStart=/usr/sbin/gearmand --listen=127.0.0.1 --pid-file=/run/gearman/server.pid --log-file=/var/log/gearman-job-server/gearman.log
+ExecStart=/usr/sbin/gearmand \
+    --listen=127.0.0.1 \
+    --pid-file=/run/gearman/server.pid \
+    --libpq-conninfo=postgres://{{ pillar.search.gearman.db.username }}:{{ pillar.search.gearman.db.password }}@127.0.0.1/{{ pillar.search.gearman.db.name }} \
+    --queue-type=Postgres \
+    --verbose=INFO \
+    --log-file=/var/log/gearman-job-server/gearman.log
 
 [Install]
 WantedBy=multi-user.target
