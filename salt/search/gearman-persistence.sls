@@ -51,6 +51,8 @@ gearman-service:
         - name: /lib/systemd/system/gearman-job-server.service
         - source: salt://search/config/lib-systemd-system-gearman-job-server.service
         - template: jinja
+        - require:
+            - pkg: gearman-daemon # elife.gearman-server.sls
 
     service.running:
         - name: gearman-job-server
@@ -69,8 +71,9 @@ clear-gearman:
         - env:
             - PGPASSWORD: {{ pillar.search.gearman.db.password }}
         - name: |
-            psql --no-password -U {{ pillar.search.gearman.db.username }} {{ pillar.search.gearman.db.name}} -c 'DELETE FROM queue'
-            service gearman-job-server restart || systemctl restart gearman-job-server || { echo "failed to restart gearman-job-server"; exit 1 }
+            set -e
+            psql --no-password -U {{ pillar.search.gearman.db.username }} {{ pillar.search.gearman.db.name }} -c "DELETE FROM queue"
+            service gearman-job-server restart || systemctl restart gearman-job-server || { echo "failed to restart gearman-job-server"; exit 1; }
         - require:
             - gearman-daemon
             - gearman-configuration
