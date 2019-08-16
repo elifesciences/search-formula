@@ -40,8 +40,8 @@ gearman-service:
     cmd.run:
         # I do not trust anymore Upstart to see changes to init scripts when using `restart` alone
         - name: |
-            stop gearman-job-server
-            start gearman-job-server
+            systemctl stop gearman-job-server || stop gearman-job-server
+            systemctl start gearman-job-server || start gearman-job-server
         - onchanges:
             - gearman-configuration
 
