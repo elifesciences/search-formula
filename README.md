@@ -1,4 +1,4 @@
-# `lax` formula
+# `search` formula
 
 This repository contains instructions for installing and configuring the `search` project.
 
