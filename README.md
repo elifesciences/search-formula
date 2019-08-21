@@ -21,8 +21,8 @@ capture the changes made since the last snapshot.
 ### creating repositories
 
 Before a snapshot can exist it must be created in a place ES knows about called a 'repository'. `fs` type repositories 
-exist on the filesystem and ES needs to know their location as well with the setting `path.repo` in 
-`/etc/elasticsearch/elasticsearch.yml`.
+exist on the filesystem and ES needs to know their location at time of repository creation. All `fs` type repositories
+must specify an absolute path that is rooted in the setting `path.repo` in [`/etc/elasticsearch/elasticsearch.yml`](https://github.com/elifesciences/search-formula/blob/master/salt/search/config/etc-elasticsearch-elasticsearch.yml#L13).
 
 To create a repository issue this api call: `PUT /_snapshot/{repo}` with the payload:
 
