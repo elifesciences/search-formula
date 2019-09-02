@@ -63,6 +63,18 @@ elasticsearch-logging-config:
         - watch_in:
             - service: elasticsearch
 
+elasticsearch-create-snapshot-script:
+    file.managed:
+        - name: /root/create-snapshot.sh
+        - source: salt://search/scripts/create-snapshot.sh
+        - mode: 755
+
+elasticsearch-restore-snapshot-script:
+    file.managed:
+        - name: /root/restore-snapshot.sh
+        - source: salt://search/scripts/restore-snapshot.sh
+        - mode: 755
+
 elasticsearch-logrotate:
     file.managed:
         - name: /etc/logrotate.d/elasticsearch
