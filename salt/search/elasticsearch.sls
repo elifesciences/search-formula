@@ -25,14 +25,13 @@ elasticsearch:
         - refresh: True
         - version: 2.4.0
         - require:
-            - oracle-java8-installer
+            - java8
             - pkgrepo: elasticsearch-repo
 
     service:
         - running
         - enable: True
         - require:
-            - oracle-java8-installer
             - pkg: elasticsearch
             - file: elasticsearch-config
             - group: elasticsearch
