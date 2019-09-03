@@ -11,10 +11,12 @@ base:
         - elife.aws-cli
         - elife.openjdk8
         - search.elasticsearch
-        - search.gearman-persistence
         - search
+        # on leader:
+        - search.gearman-persistence
         - search.leader
         # on end2end, continuumtest, prod:
+        #- elife.multiservice
         #- search.processes
         # for testing
         - elife.proofreader-php

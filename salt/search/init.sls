@@ -81,7 +81,9 @@ search-nginx-vhost:
         - template: jinja
         - require:
             - nginx-config
-            - search-composer-install
+            # not a strong requisite.
+            # this is just a config file. listen_in will take care of any eventual service restart
+            #- search-composer-install
             # see also: search-ensure-index
         - listen_in:
             - service: nginx-server-service
@@ -103,16 +105,4 @@ logrotate-search-logs:
         - name: /etc/logrotate.d/search
         - source: salt://search/config/etc-logrotate.d-search
         - template: jinja
-
-{% set processes = ['gearman-worker', 'queue-watch'] %}
-{% for process in processes %}
-search-{{ process }}-service:
-    file.managed:
-        - name: /etc/init/search-{{ process }}.conf
-        - source: salt://search/config/etc-init-search-{{ process }}.conf
-        - template: jinja
-        - require:
-            - aws-credentials-deploy-user
-            - search-cache-clean
-{% endfor %}
 

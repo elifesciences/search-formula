@@ -77,7 +77,14 @@ elasticsearch-restore-snapshot-script:
 
 elasticsearch-ready:
     cmd.run:
-        - name: wait_for_port 9200 60
+        - name: |
+            set -e
+            wait_for_port 9200 60
+            # 'yellow' is normal for single-node clusters, it takes 3-6 seconds to reach this state
+            curl --silent "localhost:9200/_cluster/health/elife_search?wait_for_status=yellow&timeout=10s"
+            # the '???' period where elasticsearch is unavailable and the search app fails
+            echo "sleeping 25 seconds"
+            sleep 25
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
             - elasticsearch

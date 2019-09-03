@@ -1,6 +1,8 @@
 # requires elife.postgresql, elife.gearman
 
+{% set osrelease = salt['grains.get']('osrelease') %}
 {% set leader = salt['elife.cfg']('project.node', 1) == 1 %}
+
 {% if leader %}
 gearman-db-user:
     postgres_user.present:
@@ -23,36 +25,58 @@ gearman-db:
         - require:
             - postgres_user: gearman-db-user
 
+# 14.04 Upstart only.
 gearman-configuration:
     file.managed:
         - name: /etc/default/gearman-job-server
         - source: salt://search/config/etc-default-gearman-job-server
         - template: jinja
         - require:
-            - gearman-daemon
+            - gearman-daemon # elife.gearman-server.sls
             - gearman-db
 
+gearman-service:
+    {% if osrelease == '14.04' %}
     cmd.run:
         # I do not trust anymore Upstart to see changes to init scripts when using `restart` alone
         - name: |
             systemctl stop gearman-job-server || stop gearman-job-server
             systemctl start gearman-job-server || start gearman-job-server
         - onchanges:
-            - file: gearman-configuration
-{% endif %}
+            - gearman-configuration
 
-{% if leader %}
+    {% else %}
+
+    file.managed:
+        - name: /lib/systemd/system/gearman-job-server.service
+        - source: salt://search/config/lib-systemd-system-gearman-job-server.service
+        - template: jinja
+        - require:
+            - pkg: gearman-daemon # elife.gearman-server.sls
+
+    service.running:
+        - name: gearman-job-server
+        - enable: True
+        - require:
+            - postgresql-ready
+            - gearman-db
+            - file: gearman-service
+        - watch:
+            - file: gearman-service
+    {% endif %}
+
 {% if pillar.elife.env in ['dev', 'ci'] %}
 clear-gearman:
     cmd.run:
         - env:
             - PGPASSWORD: {{ pillar.search.gearman.db.password }}
         - name: |
-            psql --no-password {{ pillar.search.gearman.db.name}} {{ pillar.search.gearman.db.username }} -c 'DELETE FROM queue'
-            sudo service gearman-job-server restart
+            set -e
+            psql --no-password -U {{ pillar.search.gearman.db.username }} {{ pillar.search.gearman.db.name }} -c "DELETE FROM queue"
+            service gearman-job-server restart || systemctl restart gearman-job-server || { echo "failed to restart gearman-job-server"; exit 1; }
         - require:
             - gearman-daemon
             - gearman-configuration
-{% endif %}
-{% endif %}
 
+{% endif %} # end dev/ci
+{% endif %} # end leader
