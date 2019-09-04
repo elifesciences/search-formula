@@ -1,5 +1,6 @@
 [Unit]
 Description=gearman job control server
+After=postgresql.service
 
 [Service]
 ExecStartPre=/usr/bin/install -d -o gearman /run/gearman
