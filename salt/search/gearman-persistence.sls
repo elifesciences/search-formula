@@ -25,28 +25,12 @@ gearman-db:
         - require:
             - postgres_user: gearman-db-user
 
-# 14.04 Upstart only.
+# lsh@2019-09-09: remove once file is gone
 gearman-configuration:
-    file.managed:
+    file.absent:
         - name: /etc/default/gearman-job-server
-        - source: salt://search/config/etc-default-gearman-job-server
-        - template: jinja
-        - require:
-            - gearman-daemon # elife.gearman-server.sls
-            - gearman-db
 
 gearman-service:
-    {% if osrelease == '14.04' %}
-    cmd.run:
-        # I do not trust anymore Upstart to see changes to init scripts when using `restart` alone
-        - name: |
-            systemctl stop gearman-job-server || stop gearman-job-server
-            systemctl start gearman-job-server || start gearman-job-server
-        - onchanges:
-            - gearman-configuration
-
-    {% else %}
-
     file.managed:
         - name: /lib/systemd/system/gearman-job-server.service
         - source: salt://search/config/lib-systemd-system-gearman-job-server.service
@@ -63,7 +47,6 @@ gearman-service:
             - file: gearman-service
         - watch:
             - file: gearman-service
-    {% endif %}
 
 {% if pillar.elife.env in ['dev', 'ci'] %}
 clear-gearman:
@@ -73,7 +56,7 @@ clear-gearman:
         - name: |
             set -e
             psql --no-password -U {{ pillar.search.gearman.db.username }} {{ pillar.search.gearman.db.name }} -c "DELETE FROM queue"
-            service gearman-job-server restart || systemctl restart gearman-job-server || { echo "failed to restart gearman-job-server"; exit 1; }
+            systemctl restart gearman-job-server
         - require:
             - gearman-daemon
             - gearman-configuration
