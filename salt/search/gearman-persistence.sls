@@ -1,6 +1,8 @@
 # requires elife.postgresql, elife.gearman
 
+{% set osrelease = salt['grains.get']('osrelease') %}
 {% set leader = salt['elife.cfg']('project.node', 1) == 1 %}
+
 {% if leader %}
 gearman-db-user:
     postgres_user.present:
@@ -23,36 +25,41 @@ gearman-db:
         - require:
             - postgres_user: gearman-db-user
 
+# lsh@2019-09-09: remove once file is gone
 gearman-configuration:
-    file.managed:
+    file.absent:
         - name: /etc/default/gearman-job-server
-        - source: salt://search/config/etc-default-gearman-job-server
+
+gearman-service:
+    file.managed:
+        - name: /lib/systemd/system/gearman-job-server.service
+        - source: salt://search/config/lib-systemd-system-gearman-job-server.service
         - template: jinja
         - require:
-            - gearman-daemon
+            - pkg: gearman-daemon # elife.gearman-server.sls
+
+    service.running:
+        - name: gearman-job-server
+        - enable: True
+        - require:
+            - postgresql-ready
             - gearman-db
+            - file: gearman-service
+        - watch:
+            - file: gearman-service
 
-    cmd.run:
-        # I do not trust anymore Upstart to see changes to init scripts when using `restart` alone
-        - name: |
-            systemctl stop gearman-job-server || stop gearman-job-server
-            systemctl start gearman-job-server || start gearman-job-server
-        - onchanges:
-            - file: gearman-configuration
-{% endif %}
-
-{% if leader %}
 {% if pillar.elife.env in ['dev', 'ci'] %}
 clear-gearman:
     cmd.run:
         - env:
             - PGPASSWORD: {{ pillar.search.gearman.db.password }}
         - name: |
-            psql --no-password {{ pillar.search.gearman.db.name}} {{ pillar.search.gearman.db.username }} -c 'DELETE FROM queue'
-            sudo service gearman-job-server restart
+            set -e
+            psql --no-password -U {{ pillar.search.gearman.db.username }} {{ pillar.search.gearman.db.name }} -c "DELETE FROM queue"
+            systemctl restart gearman-job-server
         - require:
             - gearman-daemon
             - gearman-configuration
-{% endif %}
-{% endif %}
 
+{% endif %} # end dev/ci
+{% endif %} # end leader

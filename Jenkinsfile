@@ -1,1 +1,1 @@
-elifeFormula('search')
+elifeFormula('search', '/srv/search')

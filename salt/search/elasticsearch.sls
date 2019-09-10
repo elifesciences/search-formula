@@ -25,14 +25,13 @@ elasticsearch:
         - refresh: True
         - version: 2.4.0
         - require:
-            - oracle-java8-installer
+            - java8
             - pkgrepo: elasticsearch-repo
 
     service:
         - running
         - enable: True
         - require:
-            - oracle-java8-installer
             - pkg: elasticsearch
             - file: elasticsearch-config
             - group: elasticsearch
@@ -85,7 +84,14 @@ elasticsearch-logrotate:
 
 elasticsearch-ready:
     cmd.run:
-        - name: wait_for_port 9200 60
+        - name: |
+            set -e
+            wait_for_port 9200 60
+            # 'yellow' is normal for single-node clusters, it takes 3-6 seconds to reach this state
+            curl --silent "localhost:9200/_cluster/health/elife_search?wait_for_status=yellow&timeout=10s"
+            # the '???' period where elasticsearch is unavailable and the search app fails
+            echo "sleeping 25 seconds"
+            sleep 25
         - user: {{ pillar.elife.deploy_user.username }}
         - require:
             - elasticsearch
