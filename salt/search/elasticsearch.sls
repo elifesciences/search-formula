@@ -74,6 +74,14 @@ elasticsearch-restore-snapshot-script:
         - source: salt://search/scripts/restore-snapshot.sh
         - mode: 755
 
+elasticsearch-logrotate:
+    file.managed:
+        - name: /etc/logrotate.d/elasticsearch
+        - source: salt://search/config/etc-logrotate.d-elasticsearch
+        - template: jinja
+        - requires:
+            - user: elasticsearch
+
 elasticsearch-ready:
     cmd.run:
         - name: |

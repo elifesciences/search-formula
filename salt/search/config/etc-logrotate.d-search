@@ -9,13 +9,3 @@
     copytruncate
 }
 {% endfor %}
-
-/var/log/elasticsearch/elasticsearch.log {
-    su elasticsearch elasticsearch
-    daily
-    rotate 7
-    notifempty
-    missingok
-    compress
-    copytruncate
-}
