@@ -8,7 +8,9 @@ WantedBy={{ process }}-controller.target
 
 [Service]
 Restart=on-failure
-#RestartSec=10
+StartLimitIntervalSec=30
+StartLimitBurst=30
+RestartSec=1
 TimeoutStopSec=70
 User={{ pillar.elife.deploy_user.username }}
 Environment="HOME=/home/{{ pillar.elife.deploy_user.username }}"
