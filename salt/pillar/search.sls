@@ -1,15 +1,31 @@
 search:
+    api:
+        url: http://localhost:8080
+        requests_batch: 10
+
     aws:
         access_key_id: null
         secret_access_key: null
         region: us-east-1
+        endpoint: http://localhost:4100
 
-    # deprecated and is now found in elife.gearman.db
+    elasticsearch:
+        servers: http://localhost:9200 
+        logging: true
+        force_sync: true
+
     gearman:
+        servers: 127.0.0.1
+        # deprecated and is now found in elife.gearman.db
         db:
             name: gearman
             username: gearman
             password: gearman
+
+    debug: true
+    validate: true
+    ttl: 0
+    rate_limit_minimum_page: 2
 
 elife:
     gearman:
