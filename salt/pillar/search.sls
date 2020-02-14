@@ -4,9 +4,6 @@ search:
         requests_batch: 10
 
     aws:
-        access_key_id: null
-        secret_access_key: null
-        region: us-east-1
         endpoint: http://localhost:4100
 
     elasticsearch:
