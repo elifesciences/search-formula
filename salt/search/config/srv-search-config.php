@@ -21,5 +21,4 @@ return [
         'endpoint' => '{{ pillar.search.aws.endpoint }}',
         {% endif %}
     ],
-    //'logger.level' => Logger::INFO,
 ];
