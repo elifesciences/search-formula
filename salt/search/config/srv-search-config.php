@@ -14,7 +14,7 @@ return [
     'api_requests_batch' => {{ pillar.search.api.requests_batch }},
     'rate_limit_minimum_page' => {{ pillar.search.rate_limit_minimum_page }},
     'aws' => [
-        'queue_name' => 'search--{{ pillar.elife.env }}',
+        'queue_name' => 'search--{{ salt['elife.cfg']('project.instance_id') }}',
         'credential_file' => true,
         'region' => 'us-east-1',
         {% if pillar.search.aws.endpoint %}
