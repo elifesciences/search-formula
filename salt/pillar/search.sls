@@ -25,11 +25,8 @@ search:
     rate_limit_minimum_page: 2
 
     feature_rds: true
-    rds_articles:
-        '10627':
-            date: '2030-01-01T00:00:00Z'
-            display: https://example.com/articles/10627
-            download: https://example.com/articles/10627
+    {% import_yaml "common-to-journal.yaml" as rds_articles %}
+    rds_articles: {{ rds_articles|yaml }}
 
 elife:
     gearman:
