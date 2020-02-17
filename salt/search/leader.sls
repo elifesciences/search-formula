@@ -20,6 +20,7 @@ search-console-ready:
             - gearman-service
             - elasticsearch-ready
             - search-composer-install
+            - search-configuration-file
             - aws-credentials-deploy-user
 
 search-ensure-index:
