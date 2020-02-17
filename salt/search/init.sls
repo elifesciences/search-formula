@@ -68,6 +68,14 @@ search-cache-clean:
         - require:
             - search-cache
 
+search-configuration-file:
+    file.managed:
+        - name: /srv/search/config.php
+        - source: salt://search/config/srv-search-config.php
+        - template: jinja
+        - require:
+            - search-repository
+
 # useful for smoke testing the JSON output
 search-jq:
     pkg.installed:
