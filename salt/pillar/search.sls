@@ -24,6 +24,13 @@ search:
     ttl: 0
     rate_limit_minimum_page: 2
 
+    feature_rds: true
+    rds_articles:
+        '10627':
+            date: '2030-01-01T00:00:00Z'
+            display: https://example.com/articles/10627
+            download: https://example.com/articles/10627
+
 elife:
     gearman:
         persistent: True
