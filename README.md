@@ -72,3 +72,4 @@ See [restore-snapshot.sh](./salt/search/scripts/restore-snapshot.sh)
 ## Copyright & Licence
 
 Copyright 2016-2019 eLife Sciences. [MIT licensed](LICENCE.txt)
+
