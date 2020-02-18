@@ -14,11 +14,25 @@ return [
     'api_requests_batch' => {{ pillar.search.api.requests_batch }},
     'rate_limit_minimum_page' => {{ pillar.search.rate_limit_minimum_page }},
     'aws' => [
+        {% if salt['elife.only_on_aws']() %}
         'queue_name' => 'search--{{ salt['elife.cfg']('project.instance_id') }}',
+        {% else %}
+        'queue_name' => 'search--dev',
+        {% endif %}
         'credential_file' => true,
         'region' => 'us-east-1',
         {% if pillar.search.aws.endpoint %}
         'endpoint' => '{{ pillar.search.aws.endpoint }}',
         {% endif %}
+    ],
+    'feature_rds' => {% if pillar.search.feature_rds %}true{% else %}false {% endif %},
+    'rds_articles' => [
+        {% for id, values in pillar.search.rds_articles.items() %}
+        '{{ id }}' => [
+            'date' => '{{ values.date }}',
+            'display' => '{{ values.display }}',
+            'download' => '{{ values.download }}',
+        ],
+        {% endfor %}
     ],
 ];
