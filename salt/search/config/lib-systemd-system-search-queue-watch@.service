@@ -7,7 +7,7 @@ PartOf={{ process }}-controller.target
 WantedBy={{ process }}-controller.target
 
 [Service]
-Restart=on-failure
+Restart=always
 StartLimitIntervalSec=30
 StartLimitBurst=30
 RestartSec=1
