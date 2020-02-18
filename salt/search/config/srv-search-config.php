@@ -27,12 +27,12 @@ return [
     ],
     'feature_rds' => {% if pillar.search.feature_rds %}true{% else %}false {% endif %},
     'rds_articles' => [
-		{% for id, values in pillar.search.rds_articles.items() %}
+        {% for id, values in pillar.search.rds_articles.items() %}
         '{{ id }}' => [
             'date' => '{{ values.date }}',
             'display' => '{{ values.display }}',
             'download' => '{{ values.download }}',
         ],
-		{% endfor %}
+        {% endfor %}
     ],
 ];
