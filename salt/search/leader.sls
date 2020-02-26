@@ -3,7 +3,7 @@ search-queue-create:
     cmd.run:
         - name: aws sqs create-queue --region=us-east-1 --queue-name=search--{{ pillar.elife.env }} --endpoint=http://localhost:4100
         - cwd: /home/{{ pillar.elife.deploy_user.username }}
-        - user: {{ pillar.elife.deploy_user.username }}
+        - runas: {{ pillar.elife.deploy_user.username }}
         - require:
             - goaws
             - aws-credentials-deploy-user
@@ -15,7 +15,7 @@ search-console-ready:
     cmd.run:
         - name: ./bin/console --env={{ pillar.elife.env }}
         - cwd: /srv/search
-        - user: {{ pillar.elife.deploy_user.username }}
+        - runas: {{ pillar.elife.deploy_user.username }}
         - require:
             - gearman-service
             - elasticsearch-ready
@@ -34,7 +34,7 @@ search-ensure-index:
             # TODO: add --delete support ans use it in dev/ci
             ./bin/console keyvalue:setup --env={{ pillar.elife.env }}
         - cwd: /srv/search/
-        - user: {{ pillar.elife.deploy_user.username }}
+        - runas: {{ pillar.elife.deploy_user.username }}
         - require:
             - search-console-ready
             - search-cache-clean

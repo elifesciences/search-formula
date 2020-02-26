@@ -92,6 +92,6 @@ elasticsearch-ready:
             # the '???' period where elasticsearch is unavailable and the search app fails
             echo "sleeping 25 seconds"
             sleep 25
-        - user: {{ pillar.elife.deploy_user.username }}
+        - runas: {{ pillar.elife.deploy_user.username }}
         - require:
             - elasticsearch

@@ -56,14 +56,14 @@ search-composer-install:
         - name: composer --no-interaction install
         {% endif %}
         - cwd: /srv/search/
-        - user: {{ pillar.elife.deploy_user.username }}
+        - runas: {{ pillar.elife.deploy_user.username }}
         - require:
             - search-cache
 
 search-cache-clean:
     cmd.run:
         - name: rm -rf var/cache/*
-        - user: {{ pillar.elife.deploy_user.username }}
+        - runas: {{ pillar.elife.deploy_user.username }}
         - cwd: /srv/search
         - require:
             - search-cache
