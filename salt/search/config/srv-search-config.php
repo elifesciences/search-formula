@@ -25,7 +25,6 @@ return [
         'endpoint' => '{{ pillar.search.aws.endpoint }}',
         {% endif %}
     ],
-    'feature_rds' => {% if pillar.search.feature_rds %}true{% else %}false {% endif %},
     'rds_articles' => [
         {% for id, values in pillar.search.rds_articles.items() %}
         '{{ id }}' => [
