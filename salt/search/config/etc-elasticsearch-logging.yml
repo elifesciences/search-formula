@@ -3,7 +3,9 @@ es.logger.level: INFO
 rootLogger: ${es.logger.level}, console, file
 logger:
   # log action execution errors for easier debugging
-  action: DEBUG
+  # lsh@2020-12: raised level for production in hopes of preventing stacktrace spam when under load. Not sure it works.
+  #action: DEBUG
+  action: {% if pillar.elife.env in ['prod'] %}INFO{% else %}DEBUG{% endif %}
 
   # deprecation logging, turn to DEBUG to see them
   deprecation: INFO, deprecation_log_file
