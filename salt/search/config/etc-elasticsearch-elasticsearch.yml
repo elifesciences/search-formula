@@ -14,7 +14,12 @@ network.host: 127.0.0.1,{{ salt['elife.cfg']('cfn.outputs.PrivateIP1') }}
 network.host: 127.0.0.1
 {% endif %}
 
-# snapshot REPOsitory
-path.repo: ["/var/lib/elasticsearch/repo"]
-path.logs: /var/log/elasticsearch
+{% if has_ext_volume %}
+path.repo: /ext/elasticsearch/repo
+path.data: /ext/elasticsearch/
+path.logs: /ext/elasticsearch/log
+{% else %}
+path.repo: /var/lib/elasticsearch/repo
 path.data: /var/lib/elasticsearch
+path.logs: /var/log/elasticsearch
+{% endif %}
