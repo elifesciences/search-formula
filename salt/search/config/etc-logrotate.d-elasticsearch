@@ -1,4 +1,8 @@
+{% if has_ext_volume %}
+/ext/elasticsearch/log/elasticsearch.log {
+{% else %}
 /var/log/elasticsearch/elasticsearch.log {
+{% endif %}
     su elasticsearch elasticsearch
     daily
     rotate 7

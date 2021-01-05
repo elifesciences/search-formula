@@ -1,5 +1,9 @@
-# Adapted from: https://github.com/elifesciences/builder-base-formula/blob/master/elife/config/etc-elasticsearch-elasticsearch.yml
 # Elasticsearch configuration for {{ grains['fqdn'] }}
+
+# master config file:
+# - https://github.com/elastic/elasticsearch/blob/master/distribution/src/config/elasticsearch.yml
+# master config file for 2.4 (this version):
+# - https://github.com/elastic/elasticsearch/blob/2.4/distribution/src/main/resources/config/elasticsearch.yml
 
 node.name: "{{ salt['elife.cfg']('project.stackname') }}"
 http.cors.allow-origin: "/.*/"
@@ -10,4 +14,12 @@ network.host: 127.0.0.1,{{ salt['elife.cfg']('cfn.outputs.PrivateIP1') }}
 network.host: 127.0.0.1
 {% endif %}
 
-path.repo: ["/var/lib/elasticsearch/repo"]
+{% if has_ext_volume %}
+path.repo: /ext/elasticsearch/repo
+path.data: /ext/elasticsearch/
+path.logs: /ext/elasticsearch/log
+{% else %}
+path.repo: /var/lib/elasticsearch/repo
+path.data: /var/lib/elasticsearch
+path.logs: /var/log/elasticsearch
+{% endif %}
