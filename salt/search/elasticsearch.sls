@@ -1,4 +1,5 @@
-{% set has_ext_volume = salt.disk.blkid(pillar.elife.external_volume.device) != {} %}
+# Adapted from:
+# - https://github.com/elifesciences/builder-base-formula/blob/master/elife/elasticsearch.sls
 
 elasticsearch-repo:
     pkgrepo.managed:
@@ -43,8 +44,6 @@ elasticsearch-config:
         - group: elasticsearch
         - mode: 644
         - template: jinja
-        - defaults:
-            has_ext_volume: {{ has_ext_volume }}
         - require:
             - pkg: elasticsearch
         - watch_in:
@@ -80,37 +79,8 @@ elasticsearch-logrotate:
         - name: /etc/logrotate.d/elasticsearch
         - source: salt://search/config/etc-logrotate.d-elasticsearch
         - template: jinja
-        - defaults:
-            has_ext_volume: {{ has_ext_volume }}
         - requires:
             - user: elasticsearch
-
-elasticsearch-migrate:
-    cmd.run:
-        - name: |
-            systemctl stop elasticsearch
-            sleep 5
-            mkdir -p /ext/elasticsearch
-            mv /var/lib/elasticsearch /ext/elasticsearch
-            mv /var/log/elasticsearch /ext/elasticsearch/log
-
-        - onlyif:
-            # disk exists
-            - test -b {{ pillar.elife.external_volume.device }}
-
-        - unless:
-            # already migrated
-            - test -d /ext/elasticsearch
-
-        #- require:
-        # problematic. end2end and ci will be leaders but wont have this statefile
-        #    - mount-external-volume # builder-base.external-volume
-
-        - watch_in:
-            - service: elasticsearch
-
-        - require_in:
-            - cmd: elasticsearch-ready
 
 elasticsearch-ready:
     cmd.run:
