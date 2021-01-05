@@ -15,8 +15,6 @@ base:
         # on leader:
         - search.gearman-persistence
         - search.leader
-        # on continuumtest and prod leader:
-        #- elife.external-volume
         # on end2end, continuumtest, prod:
         #- elife.multiservice
         #- search.processes

@@ -21,10 +21,6 @@ fi
 
 repo="repo"
 repo_path="/var/lib/elasticsearch/$repo"
-ext_repo_path="/ext/elasticsearch/$repo"
-if -d "$ext_repo_path"; then
-    repo_path="$ext_repo_path"
-fi
 elasticsearch="127.0.0.1:9200"
 
 function curlit {
