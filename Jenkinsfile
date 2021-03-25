@@ -1,1 +1,1 @@
-elifeFormula('search', '/srv/search', null, ['snsalt'])
+elifeFormula('search', '/srv/search')
