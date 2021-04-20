@@ -14,13 +14,16 @@ search-repository:
         - require:
             - composer
 
-    file.directory:
-        - name: /srv/search
-        - user: {{ pillar.elife.deploy_user.username }}
-        - group: {{ pillar.elife.deploy_user.username }}
-        - recurse:
-            - user
-            - group
+    # disabled because it's extremely verbose.
+    #file.directory:
+    #    - name: /srv/search
+    #    - user: {{ pillar.elife.deploy_user.username }}
+    #    - group: {{ pillar.elife.deploy_user.username }}
+    #    - recurse:
+    #        - user
+    #        - group
+    cmd.run:
+        - name: chown -R  {{ pillar.elife.deploy_user.username }}:{{ pillar.elife.deploy_user.username }} /srv/search
         - require:
             - builder: search-repository
 

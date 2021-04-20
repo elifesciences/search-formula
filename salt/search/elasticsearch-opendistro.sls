@@ -1,42 +1,80 @@
-elasticsearch-repo:
+# https://opendistro.github.io/for-elasticsearch-docs/docs/install/deb/
+elasticsearch-opendistro-repo:
     pkgrepo.managed:
-        - humanname: Official Elasticsearch PPA
-        - name: deb http://packages.elasticsearch.org/elasticsearch/2.x/debian stable main
+        - humanname: Official Elasticsearch OpenDistro PPA
+        - name: deb https://d3g5vo6xdbdb9a.cloudfront.net/apt stable main
         - dist: stable
-        - file: /etc/apt/sources.list.d/elasticsearch.list
-        - key_url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+        - file: /etc/apt/sources.list.d/opendistroforelasticsearch.list
+        - key_url: https://d3g5vo6xdbdb9a.cloudfront.net/GPG-KEY-opendistroforelasticsearch
+
+old-elasticsearch-removed:
+    service.dead:
+        - name: elasticsearch
+        
+    pkg.purged:
+        - name: elasticsearch
+        - require: 
+            - service: old-elasticsearch-removed
+
+# there is no upgrade path from 2.4 to 7.10, any data must be reindexed.
+# delete the indices if they exist. 
+# if we don't the elasticsearch service will fail to start.
+old-elasticsearch-data-removed:
+    file.absent:
+        - name: /var/lib/elasticsearch/elasticsearch
+        - require:
+            - old-elasticsearch-removed
+
+elasticsearch-oss:
+    cmd.run:
+        - cwd: /tmp
+        - name: |
+            set -e
+            wget --quiet https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-oss-7.10.2-amd64.deb
+            dpkg -i elasticsearch-oss-7.10.2-amd64.deb
+        - require:
+            - old-elasticsearch-removed
+        - unless:
+            # file already downloaded
+            - test -f elasticsearch-oss-7.10.2-amd64.deb
 
 elasticsearch:
-    group:
-        - present
+    group.present:
+        - name: elasticsearch
 
-    user:
-        - present
+    user.present:
+        - name: elasticsearch
         - groups:
             - elasticsearch
         - require:
             - group: elasticsearch
 
-    pkg:
-        - installed
+    pkg.installed:
+        - name: opendistroforelasticsearch
         - refresh: True
-        - version: 2.4.0
+        # https://opendistro.github.io/for-elasticsearch-docs/version-history/
+        # 1.13.2 corresponds to 7.10.2 of ES
+        - version: 1.13.2-1
         - require:
-            - java8
-            - pkgrepo: elasticsearch-repo
+            - java11
+            - elasticsearch-oss
+            - pkgrepo: elasticsearch-opendistro-repo
 
-    service:
-        - running
+    service.running:
+        - name: elasticsearch
         - enable: True
         - require:
+            - old-elasticsearch-data-removed
             - pkg: elasticsearch
             - file: elasticsearch-config
             - group: elasticsearch
 
+# ----
+
 elasticsearch-config:
     file.managed:
         - name: /etc/elasticsearch/elasticsearch.yml
-        - source: salt://search/config/etc-elasticsearch-elasticsearch.yml
+        - source: salt://search/config/etc-elasticsearch-elasticsearch.yml--opendistro
         - user: elasticsearch
         - group: elasticsearch
         - mode: 644
@@ -96,7 +134,7 @@ elasticsearch-ready:
             set -e
             wait_for_port 9200 60
             # 'yellow' is normal for single-node clusters, it takes 3-6 seconds to reach this state
-            curl --silent "localhost:9200/_cluster/health/elife_search?wait_for_status=yellow&timeout=10s"
+            curl --silent --insecure "http://localhost:9200/_cluster/health/elife_search?wait_for_status=yellow&timeout=10s"
             # the '???' period where elasticsearch is unavailable and the search app fails
             echo "sleeping 25 seconds"
             sleep 25

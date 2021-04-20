@@ -9,8 +9,15 @@ base:
         - elife.gearman
         - elife.aws-credentials
         - elife.aws-cli
-        - elife.java8
-        - search.elasticsearch
+
+        # elasticsearch 2.4
+        #- elife.java8
+        #- search.elasticsearch
+
+        # opendistro 1.13.2/elasticsearch 7.10
+        - elife.java11
+        - search.elasticsearch-opendistro
+
         - search
         # on leader:
         - search.gearman-persistence
