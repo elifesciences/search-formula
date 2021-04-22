@@ -95,7 +95,7 @@ search-nginx-vhost:
             # not a strong requisite.
             # this is just a config file. listen_in will take care of any eventual service restart
             #- search-composer-install
-            # see also: search-ensure-index
+            # see also: leader/search-ensure-index
         - listen_in:
             - service: nginx-server-service
             - service: php-fpm
