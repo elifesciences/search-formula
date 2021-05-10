@@ -4,8 +4,10 @@ search-repository:
     builder.git_latest:
         - name: git@github.com:elifesciences/search.git
         - identity: {{ pillar.elife.projects_builder.key or '' }}
-        - rev: {{ salt['elife.rev']() }}
-        - branch: {{ salt['elife.branch']() }}
+        #- rev: {{ salt['elife.rev']() }}
+        - rev: opendistro
+        #- branch: {{ salt['elife.branch']() }}
+        - branch: opendistro
         - target: /srv/search/
         - force_fetch: True
         - force_checkout: True
