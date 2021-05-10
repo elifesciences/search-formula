@@ -38,5 +38,8 @@ search-ensure-index:
         - require:
             - search-console-ready
             - search-cache-clean
-        - require_in:
-            - file: search-nginx-vhost
+            - search-nginx-vhost
+        # lsh@2021-04-22: I think this should be a regular requisite.
+        # 'search-nginx-vhost' is just a config file.
+        #- require_in:
+        #    - file: search-nginx-vhost

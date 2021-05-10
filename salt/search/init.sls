@@ -4,8 +4,10 @@ search-repository:
     builder.git_latest:
         - name: git@github.com:elifesciences/search.git
         - identity: {{ pillar.elife.projects_builder.key or '' }}
-        - rev: {{ salt['elife.rev']() }}
-        - branch: {{ salt['elife.branch']() }}
+        #- rev: {{ salt['elife.rev']() }}
+        - rev: opendistro
+        #- branch: {{ salt['elife.branch']() }}
+        - branch: opendistro
         - target: /srv/search/
         - force_fetch: True
         - force_checkout: True
@@ -14,13 +16,16 @@ search-repository:
         - require:
             - composer
 
-    file.directory:
-        - name: /srv/search
-        - user: {{ pillar.elife.deploy_user.username }}
-        - group: {{ pillar.elife.deploy_user.username }}
-        - recurse:
-            - user
-            - group
+    # disabled because it's extremely verbose.
+    #file.directory:
+    #    - name: /srv/search
+    #    - user: {{ pillar.elife.deploy_user.username }}
+    #    - group: {{ pillar.elife.deploy_user.username }}
+    #    - recurse:
+    #        - user
+    #        - group
+    cmd.run:
+        - name: chown -R  {{ pillar.elife.deploy_user.username }}:{{ pillar.elife.deploy_user.username }} /srv/search
         - require:
             - builder: search-repository
 
@@ -92,7 +97,7 @@ search-nginx-vhost:
             # not a strong requisite.
             # this is just a config file. listen_in will take care of any eventual service restart
             #- search-composer-install
-            # see also: search-ensure-index
+            # see also: leader/search-ensure-index
         - listen_in:
             - service: nginx-server-service
             - service: php-fpm
