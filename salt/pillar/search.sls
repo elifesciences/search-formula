@@ -1,6 +1,7 @@
 search:
     api:
-        url: http://localhost:8080
+        #url: http://localhost:8080
+        url: http://prod--gateway.elife.internal
         requests_batch: 10
 
     aws:
