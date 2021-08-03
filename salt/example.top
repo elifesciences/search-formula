@@ -1,6 +1,7 @@
 base:
     '*':
         - elife
+        - elife.swapspace
         - elife.php7
         - elife.composer
         - elife.nginx
@@ -22,12 +23,12 @@ base:
         # on leader:
         - search.gearman-persistence
         - search.leader
-        # on end2end, continuumtest, prod:
-        #- elife.multiservice
-        #- search.processes
+        # on opendistro, end2end, continuumtest, prod:
+        - elife.multiservice
+        - search.processes
         # for testing
-        - elife.proofreader-php
-        - api-dummy
-        - search.api-dummy
-        - elife.docker
-        - elife.goaws
+        #- elife.proofreader-php
+        #- api-dummy
+        #- search.api-dummy
+        #- elife.docker
+        #- elife.goaws
