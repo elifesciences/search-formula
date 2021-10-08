@@ -69,6 +69,20 @@ elasticsearch:
             - file: elasticsearch-config
             - group: elasticsearch
 
+opendistro-performance-analyzer:
+    # should the analyzer find itself running without this file, it will emit an error every 1-2 seconds
+    file.managed:
+        - name: /usr/share/elasticsearch/data/batch_metrics_enabled.conf
+        - contents: false
+        - require:
+            - pkg: elasticsearch
+    
+    # this version is constantly emitting noise to the logs
+    service.dead:
+        - name: opendistro-performance-analyzer
+        - require:
+            - pkg: elasticsearch
+
 # ----
 
 elasticsearch-config:
