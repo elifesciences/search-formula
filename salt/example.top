@@ -1,6 +1,7 @@
 base:
     '*':
         - elife
+        - elife.swapspace
         - elife.php7
         - elife.composer
         - elife.nginx
@@ -9,18 +10,25 @@ base:
         - elife.gearman
         - elife.aws-credentials
         - elife.aws-cli
-        - elife.java8
-        - search.elasticsearch
+
+        # elasticsearch 2.4
+        #- elife.java8
+        #- search.elasticsearch
+
+        # opendistro 1.13.2/elasticsearch 7.10
+        - elife.java11
+        - search.elasticsearch-opendistro
+
         - search
         # on leader:
         - search.gearman-persistence
         - search.leader
-        # on end2end, continuumtest, prod:
-        #- elife.multiservice
-        #- search.processes
+        # on opendistro, end2end, continuumtest, prod:
+        - elife.multiservice
+        - search.processes
         # for testing
-        - elife.proofreader-php
-        - api-dummy
-        - search.api-dummy
-        - elife.docker
-        - elife.goaws
+        #- elife.proofreader-php
+        #- api-dummy
+        #- search.api-dummy
+        #- elife.docker
+        #- elife.goaws

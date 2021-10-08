@@ -1,6 +1,3 @@
-# Adapted from:
-# - https://github.com/elifesciences/builder-base-formula/blob/master/elife/elasticsearch.sls
-
 elasticsearch-repo:
     pkgrepo.managed:
         - humanname: Official Elasticsearch PPA
