@@ -10,15 +10,20 @@ base:
         - elife.aws-credentials
         - elife.aws-cli
         - elife.java8
-        - search.elasticsearch
+        - elife.docker
         - search
-        # on leader:
-        - search.gearman-persistence
-        - search.leader
+        - search.elasticsearch
+        - search.opensearch
+        
         # on end2end, continuumtest, prod:
         #- elife.multiservice
         #- search.processes
-        # for testing
+
+        # on leader:
+        - search.gearman-persistence
+        - search.leader
+    
+        # when testing:
         - elife.proofreader-php
         - api-dummy
         - search.api-dummy

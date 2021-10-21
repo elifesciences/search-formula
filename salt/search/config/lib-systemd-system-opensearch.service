@@ -1,0 +1,18 @@
+[Unit]
+Description=opensearch container service
+After=docker.service
+Requires=docker.service
+ 
+[Service]
+Restart=always
+TimeoutStartSec=0
+WorkingDirectory=/srv/opensearch
+ExecStartPre=/usr/local/bin/docker-compose down
+ExecStart=/usr/local/bin/docker-compose up
+ExecStop=/usr/local/bin/docker-compose down
+# https://www.freedesktop.org/software/systemd/man/systemd.service.html#Type=
+#Type=oneshot
+#RemainAfterExit=true
+ 
+[Install]
+WantedBy=multi-user.target

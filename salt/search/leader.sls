@@ -25,13 +25,13 @@ search-console-ready:
 
 search-ensure-index:
     cmd.run:
+        # destroy index in dev and ci environments
         - name: |
         {% if pillar.elife.env in ['prod', 'demo', 'end2end', 'continuumtest'] %}
             ./bin/console search:setup --env={{ pillar.elife.env }}
         {% else %}
             ./bin/console search:setup --delete --env={{ pillar.elife.env }}
         {% endif %}
-            # TODO: add --delete support ans use it in dev/ci
             ./bin/console keyvalue:setup --env={{ pillar.elife.env }}
         - cwd: /srv/search/
         - runas: {{ pillar.elife.deploy_user.username }}
