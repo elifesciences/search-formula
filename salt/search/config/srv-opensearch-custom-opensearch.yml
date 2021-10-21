@@ -7,8 +7,15 @@ network.host: 0.0.0.0
 # # set to 1 to allow single node clusters
 # discovery.zen.minimum_master_nodes: 1
 
+# elife@2021-10: single node clusters enabled
+discovery.zen.minimum_master_nodes: 1
+
 # Setting network.host to a non-loopback address enables the annoying bootstrap checks. "Single-node" mode disables them again.
 #discovery.type: single-node
+
+# elife@2021-10: OS is hidden behind the 'search' app, which is hidden behind the api-gateway and journal.
+#                no ports except 22 (ssh) are available externally.
+plugins.security.disabled: true
 
 ######## Start OpenSearch Security Demo Configuration ########
 # WARNING: revise all the lines below before you go into production
