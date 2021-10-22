@@ -7,10 +7,8 @@ services:
             - cluster.name=opensearch-cluster
             - node.name=opensearch-node1
             - discovery.seed_hosts=opensearch-node1
-            - cluster.initial_master_nodes=opensearch-node1
             - bootstrap.memory_lock=true # along with the memlock settings below, disables swapping
             - "OPENSEARCH_JAVA_OPTS=-Xms{{ min_heap }} -Xmx{{ max_heap }}" # minimum and maximum Java heap size, recommend setting both to 50% of system RAM
-            - DISABLE_INSTALL_DEMO_CONFIG=true # https://opensearch.org/docs/latest/opensearch/install/docker-security/
         ulimits:
             memlock:
                 soft: -1
@@ -20,7 +18,8 @@ services:
                 hard: 65536
         volumes:
             # host:guest
-            - opensearch-data1:/usr/share/opensearch/data
+            - /usr/share/opensearch/data:/usr/share/opensearch/data
+            - /usr/share/opensearch/logs:/usr/share/opensearch/logs
             - ./custom-opensearch.yml:/usr/share/opensearch/config/opensearch.yml
         ports:
             # host:guest
@@ -28,9 +27,6 @@ services:
             - 9201:9200
         networks:
             - opensearch-net
-
-volumes:
-    opensearch-data1:
 
 networks:
     opensearch-net:
