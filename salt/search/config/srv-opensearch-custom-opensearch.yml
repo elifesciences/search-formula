@@ -16,3 +16,4 @@ discovery.type: single-node
 # presence of this line will generate a "java.lang.IllegalArgumentException: unknown setting [plugins.security.disabled]"
 #plugins.security.disabled: true
 
+path.repo: ["/usr/share/opensearch/data/snapshots"]

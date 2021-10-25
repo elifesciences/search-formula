@@ -32,6 +32,7 @@ opensearch-docker-compose:
         - defaults:
             image_name: {{ image_name }}
             # recommend setting both to 50% of system RAM
+            # todo: revisit these values
             min_heap: 512m
             max_heap: 512m
         - require:
@@ -89,3 +90,16 @@ opensearch-logrotate:
         - name: /etc/logrotate.d/opensearch
         - source: salt://search/config/etc-logrotate.d-opensearch
         - template: jinja
+
+opensearch-create-snapshot-script:
+    file.managed:
+        - name: /root/opensearch-create-snapshot.sh
+        - source: salt://search/scripts/opensearch-create-snapshot.sh
+        - mode: 755
+
+opensearch-restore-snapshot-script:
+    file.managed:
+        - name: /root/opensearch-restore-snapshot.sh
+        - source: salt://search/scripts/opensearch-restore-snapshot.sh
+        - mode: 755
+
