@@ -19,6 +19,7 @@ search-console-ready:
         - require:
             - gearman-service
             - elasticsearch-ready
+            - opensearch-ready
             - search-composer-install
             - search-configuration-file
             - aws-credentials-deploy-user

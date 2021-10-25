@@ -103,3 +103,13 @@ opensearch-restore-snapshot-script:
         - source: salt://search/scripts/opensearch-restore-snapshot.sh
         - mode: 755
 
+opensearch-upload-download-snapshot-script:
+    file.managed:
+        - name: /root/upload-download-snapshot.sh
+        - source: salt://search/scripts/upload-download-snapshot.sh
+        - template: jinja
+        - context:
+            aws_access_id: {{ pillar.elife.backups.s3_access }}
+            aws_secret_key: {{ pillar.elife.backups.s3_secret }}
+            env: {{ pillar.elife.env }}
+        - mode: 755

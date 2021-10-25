@@ -1,11 +1,21 @@
 {% set leader = salt['elife.cfg']('project.node', 1) == 1 %}
+{% set www_user = pillar.elife.webserver.username %}
+{% set deploy_user = pillar.elife.deploy_user.username %}
 
 search-repository:
+    # ensure directory exists for repository to be cloned into, nothing more
+    file.directory:
+        - name: /srv/search
+        - user: {{ deploy_user }}
+        - group: {{ deploy_user }}
+
     builder.git_latest:
         - name: git@github.com:elifesciences/search.git
         - identity: {{ pillar.elife.projects_builder.key or '' }}
         - rev: {{ salt['elife.rev']() }}
+        #- rev: opendistro
         - branch: {{ salt['elife.branch']() }}
+        #- branch: opendistro
         - target: /srv/search/
         - force_fetch: True
         - force_checkout: True
@@ -13,16 +23,7 @@ search-repository:
         - fetch_pull_requests: True
         - require:
             - composer
-
-    file.directory:
-        - name: /srv/search
-        - user: {{ pillar.elife.deploy_user.username }}
-        - group: {{ pillar.elife.deploy_user.username }}
-        - recurse:
-            - user
-            - group
-        - require:
-            - builder: search-repository
+            - file: search-repository
 
 # files and directories must be readable and writable by both elife and www-data
 # they are both in the www-data group, but the g+s flag makes sure that
@@ -30,8 +31,8 @@ search-repository:
 search-cache:
     file.directory:
         - name: /srv/search/var
-        - user: {{ pillar.elife.webserver.username }}
-        - group: {{ pillar.elife.webserver.username }}
+        - user: {{ www_user }}
+        - group: {{ www_user }}
         - dir_mode: 775
         - file_mode: 664
         - recurse:
@@ -56,14 +57,14 @@ search-composer-install:
         - name: composer --no-interaction install
         {% endif %}
         - cwd: /srv/search/
-        - runas: {{ pillar.elife.deploy_user.username }}
+        - runas: {{ deploy_user }}
         - require:
             - search-cache
 
 search-cache-clean:
     cmd.run:
         - name: rm -rf var/cache/*
-        - runas: {{ pillar.elife.deploy_user.username }}
+        - runas: {{ deploy_user }}
         - cwd: /srv/search
         - require:
             - search-cache
@@ -75,12 +76,6 @@ search-configuration-file:
         - template: jinja
         - require:
             - search-repository
-
-# useful for smoke testing the JSON output
-search-jq:
-    pkg.installed:
-        - pkgs:
-            - jq
 
 search-nginx-vhost:
     file.managed:

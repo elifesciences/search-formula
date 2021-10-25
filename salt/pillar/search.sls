@@ -7,7 +7,8 @@ search:
         endpoint: http://localhost:4100
 
     elasticsearch:
-        servers: http://localhost:9200 
+        servers: http://localhost:9200
+        #servers: http://localhost:9201 # OpenSearch
         logging: true
         force_sync: true
 

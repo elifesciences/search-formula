@@ -14,18 +14,18 @@ base:
         - search
         - search.elasticsearch
         - search.opensearch
+        #- search.remove-elasticsearch
         
         # on end2end, continuumtest, prod:
-        #- elife.multiservice
-        #- search.processes
+        - elife.multiservice
+        - search.processes
 
         # on leader:
         - search.gearman-persistence
         - search.leader
-    
+
         # when testing:
-        - elife.proofreader-php
-        - api-dummy
-        - search.api-dummy
-        - elife.docker
+        #- elife.proofreader-php
+        #- api-dummy
+        #- search.api-dummy
         - elife.goaws
