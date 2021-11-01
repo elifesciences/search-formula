@@ -69,13 +69,42 @@ search-cache-clean:
         - require:
             - search-cache
 
-search-configuration-file:
+search-configuration-file-elasticsearch:
     file.managed:
-        - name: /srv/search/config.php
+        - name: /srv/search/elasticsearch-config.php
         - source: salt://search/config/srv-search-config.php
         - template: jinja
+        - defaults:
+            servers: {{ pillar.search.elasticsearch.servers }}
+            logging: {{ pillar.search.elasticsearch.logging }}
+            force_sync: {{ pillar.search.elasticsearch.force_sync }}
         - require:
             - search-repository
+
+search-configuration-file-opensearch:
+    file.managed:
+        - name: /srv/search/opensearch-config.php
+        - source: salt://search/config/srv-search-config.php
+        - template: jinja
+        - defaults:
+            servers: {{ pillar.search.opensearch.servers }}
+            logging: {{ pillar.search.opensearch.logging }}
+            force_sync: {{ pillar.search.opensearch.force_sync }}
+        - require:
+            - search-repository
+
+search-configuration-file:
+    cmd.run:
+        - cwd: /srv/search
+        - name: |
+            if [ -e .opensearch ]; then
+                ln -sfT opensearch-config.php config.php
+            else
+                ln -sfT elasticsearch-config.php config.php
+            fi
+        - require:
+            - search-configuration-file-opensearch
+            - search-configuration-file-elasticsearch
 
 search-nginx-vhost:
     file.managed:
