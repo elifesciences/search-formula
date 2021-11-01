@@ -2,6 +2,8 @@
 # todo: pin this at a specific revision
 {% set image_name = "elifesciences/opensearch:latest" %}
 
+# not strictly necessary as docker-compose will pull the image,
+# but I don't like docker-compose pausing to download the image.
 opensearch-image:
     docker_image.present:
         - name: {{ image_name }}
@@ -16,11 +18,14 @@ srv-opensearch:
         - group: {{ deploy_user }}
 
 usr-share-opensearch:
-    file.directory:
-        - name: /usr/share/opensearch
-        # 'ubuntu' or 'vagrant' user on host. 'opensearch' user ID within guest.
-        - user: 1000
-        - group: 1000
+    cmd.run:
+        - name: |
+            set -e
+            mkdir -p /usr/share/opensearch/{data,logs}
+            chown -R 1000:1000 /usr/share/opensearch
+        # run once, permissions should be fine afterwards.
+        - unless:
+            test -d /usr/share/opensearch/
 
 # 2021-10-21: adapted from https://opensearch.org/docs/latest/opensearch/install/docker/
 opensearch-docker-compose:
@@ -36,6 +41,7 @@ opensearch-docker-compose:
             min_heap: 512m
             max_heap: 512m
         - require:
+            - opensearch-image
             - srv-opensearch
 
 opensearch-custom-config:
@@ -58,6 +64,7 @@ opensearch:
     service.running:
         - name: opensearch
         - enable: True
+        - init_delay: 20 # just wall time + a bit extra. it sucks but `curl` and it's retry logic sucks more.
         - require:
             - usr-share-opensearch
             - opensearch-service-file
@@ -68,18 +75,21 @@ opensearch:
             - opensearch-docker-compose
             - opensearch-service-file
 
-# todo: needs more work
 opensearch-ready:
     cmd.run:
         - runas: {{ deploy_user }}
+        # lsh@2021-11: changed api call from "_cluster/health/elife_search" to "_cluster/health".
+        # this state needs to complete *before* the 'elife_search' index exists.
+        # also, there is no guarantee 'elife_search' index even exists outside of dev env, so ... wtf?
         - name: |
             set -e
+            # wait_for_port doesn't really work with a docker-compose service. 
+            # The network is brought up and the port becomes available but nothing is attached until OpenSearch boots.
+            # this version of curl and it's retry logic can't handle this state and considers it a permanent failure.
             wait_for_port 9201 60
-            # 'yellow' is normal for single-node clusters, it takes 3-6 seconds to reach this state
-            curl --silent "localhost:9201/_cluster/health/elife_search?wait_for_status=yellow&timeout=10s"
-            # the '???' period where elasticsearch is unavailable and the search app fails
-            echo "sleeping 25 seconds"
-            sleep 25
+            echo "waiting for healthy cluster"
+            # 'yellow' is/was normal for single-node ES clusters.
+            curl --silent "localhost:9201/_cluster/health?wait_for_status=yellow&timeout=10s"
         - require:
             - opensearch
 
