@@ -25,7 +25,7 @@ base:
         - search.leader
 
         # when testing:
-        #- elife.proofreader-php
-        #- api-dummy
-        #- search.api-dummy
+        - elife.proofreader-php
+        - api-dummy
+        - search.api-dummy
         - elife.goaws

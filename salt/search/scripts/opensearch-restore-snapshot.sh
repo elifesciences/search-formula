@@ -25,7 +25,7 @@ fi
 repo="snapshots"
 
 repo_path="/usr/share/opensearch/data/$repo"
-opensearch="127.0.0.1:9201"
+opensearch="{{ pillar.search.opensearch.servers }}"
 
 function curlit {
     url=$1
@@ -68,7 +68,7 @@ function open_indices {
 }
 
 function demo {
-    # simple demonstration it's working
+    # simple demonstration app is working
     curl localhost/search | jq .
 }
 

@@ -12,7 +12,7 @@ snapshot="$1"
 # "Before you can take a snapshot, you have to “register” a snapshot repository."
 repo="snapshots"
 repo_path="/usr/share/opensearch/data/$repo"
-opensearch="127.0.0.1:9201"
+opensearch="{{ pillar.search.opensearch.servers }}"
 
 function errcho { 
     echo "$@" 1>&2; 

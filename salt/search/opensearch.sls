@@ -1,6 +1,5 @@
 {% set deploy_user = pillar.elife.deploy_user.username %}
-# todo: pin this at a specific revision
-{% set image_name = "elifesciences/opensearch:latest" %}
+{% set image_name = "elifesciences/opensearch:cf750aa233562e7dfbfea40184050cf2e0a92060" %}
 
 # not strictly necessary as docker-compose will pull the image,
 # but I don't like docker-compose pausing to download the image.
@@ -37,9 +36,8 @@ opensearch-docker-compose:
         - defaults:
             image_name: {{ image_name }}
             # recommend setting both to 50% of system RAM
-            # todo: revisit these values
-            min_heap: 512m
-            max_heap: 512m
+            min_heap: 512m # mb
+            max_heap: 2g   # gb
         - require:
             - opensearch-image
             - srv-opensearch
@@ -64,7 +62,7 @@ opensearch:
     service.running:
         - name: opensearch
         - enable: True
-        - init_delay: 20 # just wall time + a bit extra. it sucks but `curl` and it's retry logic sucks more.
+        - init_delay: 20 # just wall time + a bit extra.
         - require:
             - usr-share-opensearch
             - opensearch-service-file
@@ -80,12 +78,14 @@ opensearch-ready:
         - runas: {{ deploy_user }}
         # lsh@2021-11: changed api call from "_cluster/health/elife_search" to "_cluster/health".
         # this state needs to complete *before* the 'elife_search' index exists.
-        # also, there is no guarantee 'elife_search' index even exists outside of dev env, so ... wtf?
+        # also, there is no guarantee 'elife_search' index even exists outside of dev env.
+        # ---
+        # `wait_for_port` doesn't really work with a docker-compose service. 
+        # The network is brought up and the port becomes available but nothing is attached until OpenSearch boots.
+        # Ubuntu 18.04 version of curl and it's retry logic can't handle this state and considers it a permanent failure.
+        # newer versions of curl have a `--retry-all-errors` option that could replace `init_delay`
         - name: |
             set -e
-            # wait_for_port doesn't really work with a docker-compose service. 
-            # The network is brought up and the port becomes available but nothing is attached until OpenSearch boots.
-            # this version of curl and it's retry logic can't handle this state and considers it a permanent failure.
             wait_for_port 9201 60
             echo "waiting for healthy cluster"
             # 'yellow' is/was normal for single-node ES clusters.
@@ -105,12 +105,14 @@ opensearch-create-snapshot-script:
     file.managed:
         - name: /root/opensearch-create-snapshot.sh
         - source: salt://search/scripts/opensearch-create-snapshot.sh
+        - template: jinja
         - mode: 755
 
 opensearch-restore-snapshot-script:
     file.managed:
         - name: /root/opensearch-restore-snapshot.sh
         - source: salt://search/scripts/opensearch-restore-snapshot.sh
+        - template: jinja
         - mode: 755
 
 opensearch-upload-download-snapshot-script:
