@@ -1,0 +1,8 @@
+/usr/share/opensearch/logs/gc.log {
+    daily
+    rotate 7
+    notifempty
+    missingok
+    compress
+    copytruncate
+}
