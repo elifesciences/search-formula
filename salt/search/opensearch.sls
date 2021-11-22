@@ -62,7 +62,8 @@ opensearch:
     service.running:
         - name: opensearch
         - enable: True
-        - init_delay: 20 # just wall time + a bit extra.
+        #- init_delay: 20 # just wall time + a bit extra.
+        - init_delay: 25 # 2021-11-22: bumped to 25s because it's still not consistently ready across envs
         - require:
             - usr-share-opensearch
             - opensearch-service-file
