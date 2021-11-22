@@ -35,9 +35,11 @@ opensearch-docker-compose:
         - template: jinja
         - defaults:
             image_name: {{ image_name }}
-            # recommend setting both to 50% of system RAM
-            min_heap: 512m # mb
-            max_heap: 2g   # gb
+            # OS/ES recommend setting both to 50% of system RAM.
+            # max_heap at 2gb on a 4gb system goes OOM doing a reindex.
+            # below values are the same for both ES and OS.
+            min_heap: 256m # mb
+            max_heap: 1g   # gb
         - require:
             - opensearch-image
             - srv-opensearch

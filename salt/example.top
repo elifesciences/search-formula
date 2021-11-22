@@ -21,6 +21,7 @@ base:
         - search.processes
 
         # on leader:
+        #- elife.swapspace # mostly for a full re-index using OpenSearch
         - search.gearman-persistence
         - search.leader
 
