@@ -3,11 +3,6 @@
 {% set deploy_user = pillar.elife.deploy_user.username %}
 
 search-repository:
-    # ensure directory exists for repository to be cloned into, nothing more
-    file.directory:
-        - name: /srv/search
-        - user: {{ deploy_user }}
-        - group: {{ deploy_user }}
 
     builder.git_latest:
         - name: git@github.com:elifesciences/search.git
@@ -21,7 +16,16 @@ search-repository:
         - fetch_pull_requests: True
         - require:
             - composer
-            - file: search-repository
+
+    file.directory:
+        - name: /srv/search
+        - user: {{ deploy_user }}
+        - group: {{ deploy_user }}
+        - recurse:
+            - user
+            - group
+        - require:
+            - builder: search-repository
 
 # files and directories must be readable and writable by both elife and www-data
 # they are both in the www-data group, but the g+s flag makes sure that
@@ -69,6 +73,7 @@ search-cache-clean:
 
 search-configuration-file-elasticsearch:
     file.managed:
+        - user: {{ deploy_user }}
         - name: /srv/search/elasticsearch-config.php
         - source: salt://search/config/srv-search-config.php
         - template: jinja
@@ -81,6 +86,7 @@ search-configuration-file-elasticsearch:
 
 search-configuration-file-opensearch:
     file.managed:
+        - user: {{ deploy_user }}
         - name: /srv/search/opensearch-config.php
         - source: salt://search/config/srv-search-config.php
         - template: jinja
@@ -93,6 +99,7 @@ search-configuration-file-opensearch:
 
 search-configuration-file:
     cmd.run:
+        - runas: {{ deploy_user }}
         - cwd: /srv/search
         - name: |
             if [ -e .opensearch ]; then
