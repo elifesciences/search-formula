@@ -16,9 +16,9 @@ base:
         - search.opensearch
         #- search.remove-elasticsearch
         
-        # on end2end, continuumtest, prod:
-        - elife.multiservice
-        - search.processes
+        # on end2end, continuumtest, prod but *not* dev as it interferes with project_tests.sh:
+        #- elife.multiservice
+        #- search.processes
 
         # on leader:
         #- elife.swapspace # mostly for a full re-index using OpenSearch
