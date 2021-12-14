@@ -89,13 +89,13 @@ opensearch-ready:
         # `wait_for_port` doesn't really work with a docker-compose service. 
         # The network is brought up and the port becomes available but nothing is attached until OpenSearch boots.
         # Ubuntu 18.04 version of curl and it's retry logic can't handle this state and considers it a permanent failure.
-        # newer versions of curl have a `--retry-all-errors` option that could replace `init_delay`
+        # newer versions of curl have a `--retry-all-errors` option that could replace `init_delay` in the `opensearch` state.
         - name: |
             set -e
             wait_for_port 9201 60
             echo "waiting for healthy cluster"
             # 'yellow' is/was normal for single-node ES clusters.
-            curl --silent "localhost:9201/_cluster/health?wait_for_status=yellow&timeout=10s"
+            curl --silent "localhost:9201/_cluster/health?wait_for_status=yellow&timeout=30s"
         - require:
             - opensearch
 
