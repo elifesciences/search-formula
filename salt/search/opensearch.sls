@@ -1,5 +1,5 @@
 {% set deploy_user = pillar.elife.deploy_user.username %}
-{% set image_name = "elifesciences/opensearch:cf750aa233562e7dfbfea40184050cf2e0a92060" %}
+{% set image_name = "elifesciences/opensearch:af2596cca804f045720e4abda548ef26cc0a0e76" %}
 
 # not strictly necessary as docker-compose will pull the image,
 # but I don't like docker-compose pausing to download the image.
