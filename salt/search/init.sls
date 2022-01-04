@@ -83,11 +83,6 @@ search-configuration-file-elasticsearch:
             force_sync: {{ pillar.search.elasticsearch.force_sync }}
         - require:
             - search-repository
-        # lsh@2022-01-04: added after non-deterministic smoke tests while switching to opensearch
-        # restart nginx and php if the elasticsearch config changes
-        - listen_in:
-            - service: nginx-server-service
-            - service: php-fpm
 
 search-configuration-file-opensearch:
     file.managed:
@@ -101,25 +96,27 @@ search-configuration-file-opensearch:
             force_sync: {{ pillar.search.opensearch.force_sync }}
         - require:
             - search-repository
+
+search-configuration-file:
+    file.symlink:
+        - user: {{ deploy_user }}
+        - name: /srv/search/config.php
+
+        {% if salt['file.file_exists' ]('/srv/search/.opensearch') %}
+        - target: opensearch-config.php
+        {% else %}
+        - target: elasticsearch-config.php
+        {% endif %}
+
+        - require:
+            - search-configuration-file-elasticsearch
+            - search-configuration-file-opensearch
+
         # lsh@2022-01-04: added after non-deterministic smoke tests while switching to opensearch
         # restart nginx and php if the opensearch config changes
         - listen_in:
             - service: nginx-server-service
             - service: php-fpm
-
-search-configuration-file:
-    cmd.run:
-        - runas: {{ deploy_user }}
-        - cwd: /srv/search
-        - name: |
-            if [ -e .opensearch ]; then
-                ln -sfT opensearch-config.php config.php
-            else
-                ln -sfT elasticsearch-config.php config.php
-            fi
-        - require:
-            - search-configuration-file-opensearch
-            - search-configuration-file-elasticsearch
 
 search-nginx-vhost:
     file.managed:
