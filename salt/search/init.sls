@@ -83,6 +83,11 @@ search-configuration-file-elasticsearch:
             force_sync: {{ pillar.search.elasticsearch.force_sync }}
         - require:
             - search-repository
+        # lsh@2022-01-04: added after non-deterministic smoke tests while switching to opensearch
+        # restart nginx and php if the elasticsearch config changes
+        - listen_in:
+            - service: nginx-server-service
+            - service: php-fpm
 
 search-configuration-file-opensearch:
     file.managed:
@@ -96,6 +101,11 @@ search-configuration-file-opensearch:
             force_sync: {{ pillar.search.opensearch.force_sync }}
         - require:
             - search-repository
+        # lsh@2022-01-04: added after non-deterministic smoke tests while switching to opensearch
+        # restart nginx and php if the opensearch config changes
+        - listen_in:
+            - service: nginx-server-service
+            - service: php-fpm
 
 search-configuration-file:
     cmd.run:
