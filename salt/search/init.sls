@@ -98,19 +98,22 @@ search-configuration-file-opensearch:
             - search-repository
 
 search-configuration-file:
-    file.symlink:
-        - user: {{ deploy_user }}
-        - name: /srv/search/config.php
-
-        {% if salt['file.file_exists' ]('/srv/search/.opensearch') %}
-        - target: opensearch-config.php
-        {% else %}
-        - target: elasticsearch-config.php
-        {% endif %}
+    cmd.run:
+        - runas: {{ deploy_user }}
+        - cwd: /srv/search
+        - name: |
+            if [ -e .opensearch ]; then
+                ln -sfT opensearch-config.php config.php
+            else
+                ln -sfT elasticsearch-config.php config.php
+            fi
 
         - require:
             - search-configuration-file-elasticsearch
             - search-configuration-file-opensearch
+
+        # lsh@2022-01-05: using the file.symlink and testing for a file's existence through salt modules version of this state has proven unreliable. 
+        # simply restarting the server on each highstate regardless of any change to the config will hold us until elasticsearch is removed. 
 
         # lsh@2022-01-04: added after non-deterministic smoke tests while switching to opensearch
         # restart nginx and php if the opensearch config changes
