@@ -18,7 +18,6 @@ search-console-ready:
         - runas: {{ pillar.elife.deploy_user.username }}
         - require:
             - gearman-service
-            - elasticsearch-ready
             - opensearch-ready
             - search-composer-install
             - search-configuration-file
