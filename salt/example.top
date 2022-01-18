@@ -12,9 +12,9 @@ base:
         - elife.java8
         - elife.docker
         - search
-        - search.elasticsearch
+        #- search.elasticsearch
         - search.opensearch
-        #- search.remove-elasticsearch
+        - search.remove-elasticsearch
         
         # on end2end, continuumtest, prod but *not* dev as it interferes with project_tests.sh:
         #- elife.multiservice

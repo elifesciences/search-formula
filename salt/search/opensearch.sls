@@ -83,7 +83,7 @@ opensearch-ready:
     cmd.run:
         - runas: {{ deploy_user }}
         # lsh@2021-11: changed api call from "_cluster/health/elife_search" to "_cluster/health".
-        # this state needs to complete *before* the 'elife_search' index exists.
+        # this state needs to complete *before* the 'elife_search' index exists (see `leader.sls`).
         # also, there is no guarantee 'elife_search' index even exists outside of dev env.
         # ---
         # `wait_for_port` doesn't really work with a docker-compose service. 
