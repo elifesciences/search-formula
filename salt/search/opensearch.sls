@@ -41,8 +41,8 @@ opensearch-docker-compose:
             # todo: we get a warning about this:
             # "initial heap size [268435456] not equal to maximum heap size [1073741824]; this can cause resize pauses and prevents memory locking from locking the entire heap"
             # however until ES is purged min_heap can't be any higher
-            min_heap: 256m # mb, -Xms
-            max_heap: 1g   # gb, -Xmx
+            min_heap: 1g # gb, -Xms
+            max_heap: 1g # gb, -Xmx
         - require:
             - opensearch-image
             - srv-opensearch
