@@ -84,7 +84,6 @@ search-configuration-file:
         - user: {{ deploy_user }}
         - name: /srv/search/config.php
         - source: salt://search/config/srv-search-config.php
-        - replace: True
         - template: jinja
         - defaults:
             servers: {{ pillar.search.opensearch.servers }}
