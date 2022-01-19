@@ -2,8 +2,16 @@
 {% set www_user = pillar.elife.webserver.username %}
 {% set deploy_user = pillar.elife.deploy_user.username %}
 
-search-repository:
+# lsh@2022-01-18: remove once all nodes have run this
+purge-es:
+    cmd.run:
+        - name: |
+            rm -f /srv/search/config.php /srv/search/elasticsearch-config.php /srv/search/opensearch-config.php
+            rm -rf /var/log/elasticsearch
+            rm -rf /var/lib/elasticsearch
+            rm -rf /home/elasticsearch
 
+search-repository:
     builder.git_latest:
         - name: git@github.com:elifesciences/search.git
         - identity: {{ pillar.elife.projects_builder.key or '' }}
@@ -27,9 +35,9 @@ search-repository:
         - require:
             - builder: search-repository
 
-# files and directories must be readable and writable by both elife and www-data
-# they are both in the www-data group, but the g+s flag makes sure that
-# new files and directories created inside have the www-data group
+# files and directories must be readable and writable by both elife and www-data.
+# they are both in the www-data group, but the g+s flag ensures that new files and 
+# directories created inside have the www-data group.
 search-cache:
     file.directory:
         - name: /srv/search/var
@@ -71,23 +79,10 @@ search-cache-clean:
         - require:
             - search-cache
 
-search-configuration-file-elasticsearch:
+search-configuration-file:
     file.managed:
         - user: {{ deploy_user }}
-        - name: /srv/search/elasticsearch-config.php
-        - source: salt://search/config/srv-search-config.php
-        - template: jinja
-        - defaults:
-            servers: {{ pillar.search.elasticsearch.servers }}
-            logging: {{ pillar.search.elasticsearch.logging }}
-            force_sync: {{ pillar.search.elasticsearch.force_sync }}
-        - require:
-            - search-repository
-
-search-configuration-file-opensearch:
-    file.managed:
-        - user: {{ deploy_user }}
-        - name: /srv/search/opensearch-config.php
+        - name: /srv/search/config.php
         - source: salt://search/config/srv-search-config.php
         - template: jinja
         - defaults:
@@ -96,30 +91,7 @@ search-configuration-file-opensearch:
             force_sync: {{ pillar.search.opensearch.force_sync }}
         - require:
             - search-repository
-
-search-configuration-file:
-    cmd.run:
-        - runas: {{ deploy_user }}
-        - cwd: /srv/search
-        - name: |
-            if [ -e .opensearch ]; then
-                ln -sfT opensearch-config.php config.php
-            else
-                ln -sfT elasticsearch-config.php config.php
-            fi
-
-        - require:
-            - search-configuration-file-elasticsearch
-            - search-configuration-file-opensearch
-
-        # lsh@2022-01-05: using the file.symlink and testing for a file's existence through salt modules version of this state has proven unreliable. 
-        # simply restarting the server on each highstate regardless of any change to the config will hold us until elasticsearch is removed. 
-
-        # lsh@2022-01-04: added after non-deterministic smoke tests while switching to opensearch
-        # restart nginx and php if the opensearch config changes
-        - listen_in:
-            - service: nginx-server-service
-            - service: php-fpm
+            - purge-es
 
 search-nginx-vhost:
     file.managed:
@@ -128,10 +100,6 @@ search-nginx-vhost:
         - template: jinja
         - require:
             - nginx-config
-            # not a strong requisite.
-            # this is just a config file. listen_in will take care of any eventual service restart
-            #- search-composer-install
-            # see also: search-ensure-index
         - listen_in:
             - service: nginx-server-service
             - service: php-fpm
