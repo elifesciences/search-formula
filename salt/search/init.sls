@@ -1,6 +1,7 @@
 {% set leader = salt['elife.cfg']('project.node', 1) == 1 %}
 {% set www_user = pillar.elife.webserver.username %}
 {% set deploy_user = pillar.elife.deploy_user.username %}
+{% set osrelease = salt['grains.get']('osrelease') %}
 
 # lsh@2022-01-18: remove once all nodes have run this
 purge-es:
@@ -57,14 +58,16 @@ search-cache:
         - require:
             - file: search-cache
 
+{% set ignore_php = "--ignore-platform-req=php" if osrelease != "18.04" else "" %}
+
 search-composer-install:
     cmd.run:
         {% if pillar.elife.env in ['prod', 'demo'] %}
-        - name: composer --no-interaction install --classmap-authoritative --no-dev
+        - name: composer {{ ignore_php }} --no-interaction install --classmap-authoritative --no-dev
         {% elif pillar.elife.env in ['ci', 'end2end', 'continuumtest'] %}
-        - name: composer --no-interaction install --classmap-authoritative
+        - name: composer {{ ignore_php }} --no-interaction install --classmap-authoritative
         {% else %}
-        - name: composer --no-interaction install
+        - name: composer {{ ignore_php }} --no-interaction install
         {% endif %}
         - cwd: /srv/search/
         - runas: {{ deploy_user }}
