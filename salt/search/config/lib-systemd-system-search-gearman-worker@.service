@@ -15,4 +15,7 @@ TimeoutStopSec=70
 User={{ pillar.elife.deploy_user.username }}
 Environment="HOME=/home/{{ pillar.elife.deploy_user.username }}"
 WorkingDirectory=/srv/search
+# '%I | For instantiated units this is the string between the first "@" character and the type suffix. Empty for non-instantiated units.'
+# 'search-gearman-worker@0.service' => 0
+# /usr/bin/php bin/console gearman:worker -e prod 0
 ExecStart=/usr/bin/php bin/console gearman:worker -e {{ pillar.elife.env }} %I
