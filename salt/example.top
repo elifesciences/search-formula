@@ -10,7 +10,7 @@ base:
         - elife.aws-credentials
         - elife.aws-cli
         - elife.java8
-        - elife.docker
+        - elife.docker-native
         - search
         - search.opensearch
         
