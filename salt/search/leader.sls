@@ -13,7 +13,10 @@ search-queue-create:
 
 search-console-ready:
     cmd.run:
-        - name: ./bin/console --env={{ pillar.elife.env }}
+        # lsh@2022-07-20, added '--no-interaction' to avoid the prompt:
+        #   'mindplay/composer-locator contains a Composer plugin which is currently not in your allow-plugins config.'
+        # the cause of the prompt is being dealt with in composer.json
+        - name: ./bin/console --env={{ pillar.elife.env }} --no-interaction
         - cwd: /srv/search
         - runas: {{ pillar.elife.deploy_user.username }}
         - require:
