@@ -5,7 +5,7 @@ base:
         - elife.composer
         - elife.nginx
         - elife.nginx-php7
-        - elife.postgresql
+        - elife.postgresql-11
         - elife.gearman
         - elife.aws-credentials
         - elife.aws-cli
