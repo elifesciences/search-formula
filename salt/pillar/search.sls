@@ -27,6 +27,9 @@ search:
     {% import_yaml "rds-articles.yaml" as rds_articles %}
     rds_articles: {{ rds_articles|yaml }}
 
+    {% import_yaml "reviewed-preprints.yaml" as reviewed_preprints %}
+    reviewed_preprints: {{ reviewed_preprints|yaml }}
+
 elife:
     composer:
         version: 2.2.7
