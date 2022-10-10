@@ -38,11 +38,7 @@ return [
         {% for id, values in pillar.search.reviewed_preprints.items() %}
         '{{ id }}' => [
             'reviewedDate' => '{{ values.reviewedDate }}',
-            'curationLabels' => [
-                {% for curationLabel in values.curationLabels.items() %}
-                    '{{ curationLabel }}',
-                {% endfor %}
-            ],
+            'curationLabels' => [],
         ],
         {% endfor %}
     ],
