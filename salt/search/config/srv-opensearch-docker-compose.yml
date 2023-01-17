@@ -19,7 +19,7 @@ services:
         volumes:
             # host:guest
             - /usr/share/opensearch/data:/usr/share/opensearch/data
-            - /usr/share/opensearch/logs:/usr/share/opensearch/logs
+            - /var/log/opensearch:/usr/share/opensearch/logs
             - ./custom-opensearch.yml:/usr/share/opensearch/config/opensearch.yml
         ports:
             # host:guest

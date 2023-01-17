@@ -1,4 +1,4 @@
-/usr/share/opensearch/logs/gc.log {
+/var/log/opensearch/gc.log {
     daily
     rotate 7
     notifempty
