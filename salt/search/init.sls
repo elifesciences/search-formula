@@ -58,16 +58,14 @@ search-cache:
         - require:
             - file: search-cache
 
-{% set ignore_php = "--ignore-platform-req=php" if osrelease != "18.04" else "" %}
-
 search-composer-install:
     cmd.run:
         {% if pillar.elife.env in ['prod', 'demo'] %}
-        - name: composer {{ ignore_php }} --no-interaction install --classmap-authoritative --no-dev
+        - name: composer --no-interaction install --classmap-authoritative --no-dev
         {% elif pillar.elife.env in ['ci', 'end2end', 'continuumtest'] %}
-        - name: composer {{ ignore_php }} --no-interaction install --classmap-authoritative
+        - name: composer --no-interaction install --classmap-authoritative
         {% else %}
-        - name: composer {{ ignore_php }} --no-interaction install
+        - name: composer --no-interaction install
         {% endif %}
         - cwd: /srv/search/
         - runas: {{ deploy_user }}
