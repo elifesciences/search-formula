@@ -1,5 +1,6 @@
 {% set deploy_user = pillar.elife.deploy_user.username %}
 {% set image_name = "elifesciences/opensearch:af2596cca804f045720e4abda548ef26cc0a0e76" %}
+{% set docker_user = "1000" %}
 
 # not strictly necessary as docker-compose will pull the image,
 # but I don't like docker-compose pausing to download the image.
@@ -20,11 +21,31 @@ usr-share-opensearch:
     cmd.run:
         - name: |
             set -e
-            mkdir -p /usr/share/opensearch/{data,logs}
-            chown -R 1000:1000 /usr/share/opensearch
+            mkdir -p /usr/share/opensearch/data
+            chown -R {{ docker_user }}:{{ docker_user }} /usr/share/opensearch
         # run once, permissions should be fine afterwards.
         - unless:
             test -d /usr/share/opensearch/
+
+var-log-opensearch:
+    file.directory:
+        - name: /var/log/opensearch
+        - user: {{ docker_user }}
+        - group: {{ docker_user }}
+
+mv-usr-share-opensearch-logs-to-var-log-opensearch:
+    cmd.run:
+        - name: |
+            set -e
+            test -f /lib/systemd/system/opensearch.service && systemctl stop opensearch
+            rm -rf /var/log/opensearch
+            mv /usr/share/opensearch/logs/ /var/log/opensearch/
+        - onlyif:
+            # only move logs if directory is still present
+            test -d /usr/share/opensearch/logs
+        - require:
+            - var-log-opensearch
+            - usr-share-opensearch
 
 # 2021-10-21: adapted from https://opensearch.org/docs/latest/opensearch/install/docker/
 opensearch-docker-compose:
@@ -71,6 +92,8 @@ opensearch:
         - init_delay: 30 # 2021-11-23: bumped to 30s because it's still not consistently ready across envs
         - require:
             - usr-share-opensearch
+            - var-log-opensearch
+            - mv-usr-share-opensearch-logs-to-var-log-opensearch
             - opensearch-service-file
             - opensearch-custom-config
         # if any of these states change, restart *once*, after everything is done
