@@ -13,25 +13,28 @@ search-queue-create:
 
 search-console-ready:
     cmd.run:
-        - name: ./bin/console --env={{ pillar.elife.env }}
+        # lsh@2022-07-20, added '--no-interaction' to avoid the prompt:
+        #   'mindplay/composer-locator contains a Composer plugin which is currently not in your allow-plugins config.'
+        # the cause of the prompt is being dealt with in composer.json
+        - name: ./bin/console --env={{ pillar.elife.env }} --no-interaction
         - cwd: /srv/search
         - runas: {{ pillar.elife.deploy_user.username }}
         - require:
             - gearman-service
-            - elasticsearch-ready
+            - opensearch-ready
             - search-composer-install
             - search-configuration-file
             - aws-credentials-deploy-user
 
 search-ensure-index:
     cmd.run:
+        # destroy index in dev and ci environments
         - name: |
         {% if pillar.elife.env in ['prod', 'demo', 'end2end', 'continuumtest'] %}
             ./bin/console search:setup --env={{ pillar.elife.env }}
         {% else %}
             ./bin/console search:setup --delete --env={{ pillar.elife.env }}
         {% endif %}
-            # TODO: add --delete support ans use it in dev/ci
             ./bin/console keyvalue:setup --env={{ pillar.elife.env }}
         - cwd: /srv/search/
         - runas: {{ pillar.elife.deploy_user.username }}

@@ -1,14 +1,17 @@
 #!/bin/bash
-# creates a repository in Elasticsearch to restore a snapshot
-# decompresses given path to snapshot file
-# closes all open indices
-# restores snapshot
-# opens all closed indices
+# creates a repository in Opensearch to restore a snapshot.
+# decompresses given path to snapshot file.
+# closes all open indices.
+# restores snapshot.
+# opens all closed indices.
+#
+# once restored OpenSearch must be switched to use the new index.
+# from the search app: ./bin/console index:
 
 set -eu
 
-snapshot="$1" # 'backup'
-snapshot_path="$2" # '/tmp/backup.tar.gz'
+snapshot="$1" # name of the snapshot, 'backup'
+snapshot_path="$(realpath $2)" # '/tmp/backup.tar.gz'
 
 function errcho { 
     echo "$@" 1>&2; 
@@ -19,15 +22,16 @@ if [ ! -f "$snapshot_path" ]; then
     exit 1
 fi
 
-repo="repo"
-repo_path="/var/lib/elasticsearch/$repo"
-elasticsearch="127.0.0.1:9200"
+repo="snapshots"
+
+repo_path="/usr/share/opensearch/data/$repo"
+opensearch="{{ pillar.search.opensearch.servers }}"
 
 function curlit {
     url=$1
     status_code=$(curl --silent --output /dev/stderr --write-out "%{http_code}" "$@")
     # https://superuser.com/questions/590099/can-i-make-curl-fail-with-an-exitcode-different-than-0-if-the-http-status-code-i
-    errcho "elasticsearch response status code: $status_code"
+    errcho "opensearch response status code: $status_code"
     if test $status_code -ne 200; then
         exit $status_code
     fi
@@ -35,7 +39,7 @@ function curlit {
 
 function create_repo {
     errcho "creating repo '$repo' at '$repo_path' for snapshots (idempotent)"
-    curlit -XPUT "$elasticsearch/_snapshot/$repo" -d '{"type": "fs", "settings": {"location": "'$repo_path'"}}'
+    curlit -XPUT "$opensearch/_snapshot/$repo" -H "Content-Type: application/json" -d '{"type": "fs", "settings": {"location": "'$repo_path'"}}'
 }
 
 function decompress_snapshot {
@@ -50,17 +54,22 @@ function decompress_snapshot {
 
 function close_indices {
     errcho "closing all indices"
-    curlit -XPOST "$elasticsearch/_all/_close"
+    curlit -XPOST "$opensearch/_all/_close"
 }
 
 function restore_snapshot {
     errcho "restoring snapshot '$snapshot'"
-    curlit -XPOST "$elasticsearch/_snapshot/$repo/$snapshot/_restore?wait_for_completion=true"
+    curlit -XPOST "$opensearch/_snapshot/$repo/$snapshot/_restore?wait_for_completion=true"
 }
 
 function open_indices {
     errcho "opening all indices"
-    curlit -XPOST "$elasticsearch/_all/_open"
+    curlit -XPOST "$opensearch/_all/_open"
+}
+
+function demo {
+    # simple demonstration app is working
+    curl localhost/search | jq .
 }
 
 create_repo
@@ -69,4 +78,6 @@ close_indices
 restore_snapshot
 open_indices
 
-curl localhost/search | jq .
+echo "---"
+
+demo

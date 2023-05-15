@@ -1,5 +1,4 @@
-/var/log/elasticsearch/elasticsearch.log {
-    su elasticsearch elasticsearch
+/var/log/opensearch/gc.log {
     daily
     rotate 7
     notifempty

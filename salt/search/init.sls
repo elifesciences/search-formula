@@ -1,4 +1,16 @@
 {% set leader = salt['elife.cfg']('project.node', 1) == 1 %}
+{% set www_user = pillar.elife.webserver.username %}
+{% set deploy_user = pillar.elife.deploy_user.username %}
+{% set osrelease = salt['grains.get']('osrelease') %}
+
+# lsh@2022-01-18: remove once all nodes have run this
+purge-es:
+    cmd.run:
+        - name: |
+            rm -f /srv/search/config.php /srv/search/elasticsearch-config.php /srv/search/opensearch-config.php
+            rm -rf /var/log/elasticsearch
+            rm -rf /var/lib/elasticsearch
+            rm -rf /home/elasticsearch
 
 search-repository:
     builder.git_latest:
@@ -16,22 +28,22 @@ search-repository:
 
     file.directory:
         - name: /srv/search
-        - user: {{ pillar.elife.deploy_user.username }}
-        - group: {{ pillar.elife.deploy_user.username }}
+        - user: {{ deploy_user }}
+        - group: {{ deploy_user }}
         - recurse:
             - user
             - group
         - require:
             - builder: search-repository
 
-# files and directories must be readable and writable by both elife and www-data
-# they are both in the www-data group, but the g+s flag makes sure that
-# new files and directories created inside have the www-data group
+# files and directories must be readable and writable by both elife and www-data.
+# they are both in the www-data group, but the g+s flag ensures that new files and 
+# directories created inside have the www-data group.
 search-cache:
     file.directory:
         - name: /srv/search/var
-        - user: {{ pillar.elife.webserver.username }}
-        - group: {{ pillar.elife.webserver.username }}
+        - user: {{ www_user }}
+        - group: {{ www_user }}
         - dir_mode: 775
         - file_mode: 664
         - recurse:
@@ -56,31 +68,31 @@ search-composer-install:
         - name: composer --no-interaction install
         {% endif %}
         - cwd: /srv/search/
-        - runas: {{ pillar.elife.deploy_user.username }}
+        - runas: {{ deploy_user }}
         - require:
             - search-cache
 
 search-cache-clean:
     cmd.run:
         - name: rm -rf var/cache/*
-        - runas: {{ pillar.elife.deploy_user.username }}
+        - runas: {{ deploy_user }}
         - cwd: /srv/search
         - require:
             - search-cache
 
 search-configuration-file:
     file.managed:
+        - user: {{ deploy_user }}
         - name: /srv/search/config.php
         - source: salt://search/config/srv-search-config.php
         - template: jinja
+        - defaults:
+            servers: {{ pillar.search.opensearch.servers }}
+            logging: {{ pillar.search.opensearch.logging }}
+            force_sync: {{ pillar.search.opensearch.force_sync }}
         - require:
             - search-repository
-
-# useful for smoke testing the JSON output
-search-jq:
-    pkg.installed:
-        - pkgs:
-            - jq
+            - purge-es
 
 search-nginx-vhost:
     file.managed:
@@ -89,10 +101,6 @@ search-nginx-vhost:
         - template: jinja
         - require:
             - nginx-config
-            # not a strong requisite.
-            # this is just a config file. listen_in will take care of any eventual service restart
-            #- search-composer-install
-            # see also: search-ensure-index
         - listen_in:
             - service: nginx-server-service
             - service: php-fpm

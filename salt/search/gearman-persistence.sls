@@ -7,7 +7,7 @@
 gearman-db-user:
     postgres_user.present:
         - name: {{ pillar.search.gearman.db.username }}
-        - encrypted: True
+        - encrypted: scram-sha-256
         - password: {{ pillar.search.gearman.db.password }}
         - refresh_password: True
         - db_user: {{ pillar.elife.db_root.username }}
