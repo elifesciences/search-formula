@@ -4,7 +4,7 @@ api-dummy-nginx-vhost-dev:
         - source: salt://search/config/etc-nginx-sites-enabled-api-dummy-dev.conf
         - require:
             - api-dummy-composer-install
-            - search-nginx-vhost
+            - search-vhost
         - listen_in:
             - service: nginx-server-service
             - service: php-fpm

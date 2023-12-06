@@ -3,15 +3,6 @@
 {% set deploy_user = pillar.elife.deploy_user.username %}
 {% set osrelease = salt['grains.get']('osrelease') %}
 
-# lsh@2022-01-18: remove once all nodes have run this
-purge-es:
-    cmd.run:
-        - name: |
-            rm -f /srv/search/config.php /srv/search/elasticsearch-config.php /srv/search/opensearch-config.php
-            rm -rf /var/log/elasticsearch
-            rm -rf /var/lib/elasticsearch
-            rm -rf /home/elasticsearch
-
 search-repository:
     builder.git_latest:
         - name: git@github.com:elifesciences/search.git
@@ -33,8 +24,30 @@ search-repository:
         - recurse:
             - user
             - group
+        - silent: true
         - require:
             - builder: search-repository
+
+# tells `search-cache-clean` not to delete the .gitkeep file.
+# bit weird.
+search-cache-clean.gitkeep:
+  file.managed:
+     - name: /srv/search/var/cache/.gitkeep
+     - create: False
+     - replace: False
+     - require_in:
+        - search-cache-clean
+
+search-cache-clean:
+    file.directory:
+        - name: /srv/search/var/cache/
+        - clean: true
+        - silent: true
+        - onlyif:
+            # only clean the cache dir if it exists.
+            # lsh@2023-12-06: moved this state above `search-cache` to 
+            # avoid spending time setting mode bits on files that are then deleted.
+            - test -d /srv/search/var/cache
 
 # files and directories must be readable and writable by both elife and www-data.
 # they are both in the www-data group, but the g+s flag ensures that new files and 
@@ -42,7 +55,10 @@ search-repository:
 search-cache:
     file.directory:
         - name: /srv/search/var
-        - user: {{ www_user }}
+        # lsh@2023-12-06: errors starting when owner isn't elife
+        # "PHP Fatal error:  Uncaught JMS\Serializer\Exception\InvalidArgumentException: The cache directory "/srv/search/src/Search/../../var/cache" is not writable."
+        # search-console-ready > cmd.run > ./bin/console --env=dev --no-interaction
+        - user: elife # {{ www_user }}
         - group: {{ www_user }}
         - dir_mode: 775
         - file_mode: 664
@@ -50,10 +66,13 @@ search-cache:
             - user
             - group
             - mode
+        - silent: true
         - require:
             - search-repository
+            - search-cache-clean
 
     cmd.run:
+        # all new files in directory will inherit the group (www-user) of the directory
         - name: chmod -R g+s /srv/search/var
         - require:
             - file: search-cache
@@ -72,14 +91,6 @@ search-composer-install:
         - require:
             - search-cache
 
-search-cache-clean:
-    cmd.run:
-        - name: rm -rf var/cache/*
-        - runas: {{ deploy_user }}
-        - cwd: /srv/search
-        - require:
-            - search-cache
-
 search-configuration-file:
     file.managed:
         - user: {{ deploy_user }}
@@ -92,9 +103,23 @@ search-configuration-file:
             force_sync: {{ pillar.search.opensearch.force_sync }}
         - require:
             - search-repository
-            - purge-es
 
-search-nginx-vhost:
+{% if pillar.elife.webserver.app == "caddy" %}
+
+search-vhost:
+    file.managed:
+        - name: /etc/caddy/sites.d/search
+        - source: salt://search/config/etc-caddy-sites.d-search
+        - template: jinja
+        - require:
+            - caddy-config
+        - listen_in:
+            - service: nginx-server-service
+            - service: php-fpm
+
+{% else %}
+
+search-vhost:
     file.managed:
         - name: /etc/nginx/sites-enabled/search.conf
         - source: salt://search/config/etc-nginx-sites-enabled-search.conf
@@ -104,6 +129,8 @@ search-nginx-vhost:
         - listen_in:
             - service: nginx-server-service
             - service: php-fpm
+
+{% endif %}
 
 syslog-ng-search-logs:
     file.managed:

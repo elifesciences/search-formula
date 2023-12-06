@@ -1,0 +1,110 @@
+(certs) {
+    tls /etc/certificates/certificate.chained.crt /etc/certificates/privkey.pem
+}
+
+(config) {
+
+    log {
+        output file /var/log/caddy/access.log {
+            # see /etc/logrotate.d/caddy
+            roll_disabled
+        }
+        format json {
+            time_format rfc3339
+        }
+    }
+
+    #location ~ \..*/.*\.php$ {
+    #    return 403;
+    #}
+
+    # starts with a dot     '.'
+    # followed by anything  '.*'
+    # then a forward slash  '/'
+    # then anything         '.*'
+    # ending with '.php'    '\.php'
+
+    # this matches paths like:
+    # "./.foo.php"
+    # ".foo/baz.php"
+    # ".foo/bar/baz.php"
+    # "foo/.bar/baz.php"
+
+    # it doesn't match "foo/bar.PHP" (match is case sensitive)
+    # nor ".bar.php" (must contain a slash)
+
+    # I'm guessing it was copied from the internet somewhere with the intent to prevent path manipulation.
+    # this will do something similar:
+    error \..*/.*\.php$ 403
+
+    # 'try_files' works by testing a set of files and using the last one if no match is found.
+    # in this case, any /john /dick /harry request coming in will fail to match and be rewritten to /app_<env>.php,
+    # preserving any query params.
+    # - https://caddyserver.com/docs/caddyfile/directives/try_files
+    # - https://caddyserver.com/docs/caddyfile/matchers#file
+    # - https://docs.nginx.com/nginx/admin-guide/web-server/serving-static-content/#trying-several-options
+
+    #location / {
+    #    try_files $uri /app_{{ pillar.elife.env }}.php$is_args$args;
+    #}
+
+    try_files {path} /app_{{ pillar.elife.env }}.php?{query}
+
+    #location ~ /app_.*.php$ {
+    #    return 404;
+    #}
+
+    # this matches:
+    # /app_.php
+    # /app_prod.php
+    # /foo/app_prod.php
+    # /.././app_.php
+    
+    # I'm guessing it's to prevent external requests for /app_prod.php
+    # this should prevent that:
+    error /app_.*\.php$ 404
+
+
+    #location ~ ^/app_{{ pillar.elife.env }}\.php(/|$) {
+    #    fastcgi_split_path_info ^(.+\.php)(/.+)$;
+    #    include fastcgi_params;
+    #    fastcgi_param SCRIPT_FILENAME $request_filename;
+    #    fastcgi_param DOCUMENT_ROOT $realpath_root;
+    #    fastcgi_param ENVIRONMENT_NAME {{ pillar.elife.env }};
+    #    fastcgi_intercept_errors on;
+    #    fastcgi_pass unix:/var/php-fpm.sock;
+    #    internal;
+    #}
+
+    # matches:
+    # /app_prod.php
+    # /app_prod.php/
+    # /app_prod.php/fooooooo
+
+    # but not
+    # /app_prod.php?
+
+    php_fastcgi path_regexp ^/app_{{ pillar.elife.env }}\.php(/|$) {
+        split ^(.+\.php)(/.+)$;
+        env SCRIPT_FILENAME ...
+        env DOCUMENT_ROOT ...
+        env ENVIRONMENT_NAME {{ pillar.elife.env }}
+    }
+}
+
+{% set h1 = salt['elife.cfg']('project.project_hostname') %}{# bp.elifesciences.org -#}
+{% set h2 = salt['elife.cfg']('project.full_hostname') %}{# prod--bp.elifesciences.org -#}
+{% set h3 = salt['elife.cfg']('project.int_project_hostname') %}{# bp.elife.internal -#}
+{% set h4 = salt['elife.cfg']('project.int_full_hostname') %}{# prod--bp.elife.internal -#}
+
+http://localhost http://127.0.0.1 {% if h3 %}http://{{ h3 }} {% endif %}{% if h4 %}http://{{ h4 }} {% endif %}{
+    import config
+}
+
+{% if salt['elife.cfg']('cfn.outputs.DomainName') -%}
+{% if h1 %}https://{{ h1 }} {% endif %}{% if h2 %}https://{{ h2 }} {% endif %}{
+    import certs
+    import config
+}
+{% endif %}
+

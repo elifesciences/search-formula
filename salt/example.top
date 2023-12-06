@@ -3,8 +3,10 @@ base:
         - elife
         - elife.php7
         - elife.composer
-        - elife.nginx
-        - elife.nginx-php7
+        #- elife.nginx
+        - elife.disable-nginx
+        - elife.caddy
+        - elife.nginx-php7 # nothing nginx-specific here
         - elife.postgresql-12
         - elife.gearman
         - elife.aws-credentials
