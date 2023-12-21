@@ -54,7 +54,6 @@ clear-gearman:
             systemctl restart gearman-job-server
         - require:
             - gearman-daemon
-            - gearman-configuration
 
 {% endif %} # end dev/ci
 {% endif %} # end leader

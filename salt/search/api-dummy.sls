@@ -1,3 +1,7 @@
+{% if pillar.elife.webserver.app == "caddy" %}
+
+{% else %}
+
 api-dummy-nginx-vhost-dev:
     file.managed:
         - name: /etc/nginx/sites-enabled/api-dummy-dev.conf
@@ -8,3 +12,5 @@ api-dummy-nginx-vhost-dev:
         - listen_in:
             - service: nginx-server-service
             - service: php-fpm
+
+{% endif %}

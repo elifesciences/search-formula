@@ -13,29 +13,8 @@
             time_format rfc3339
         }
     }
-
-    #location ~ \..*/.*\.php$ {
-    #    return 403;
-    #}
-
-    # starts with a dot     '.'
-    # followed by anything  '.*'
-    # then a forward slash  '/'
-    # then anything         '.*'
-    # ending with '.php'    '\.php'
-
-    # this matches paths like:
-    # "./.foo.php"
-    # ".foo/baz.php"
-    # ".foo/bar/baz.php"
-    # "foo/.bar/baz.php"
-
-    # it doesn't match "foo/bar.PHP" (match is case sensitive)
-    # nor ".bar.php" (must contain a slash)
-
-    # I'm guessing it was copied from the internet somewhere with the intent to prevent path manipulation.
-    # this will do something similar:
-    error \..*/.*\.php$ 403
+    
+    root * /srv/search/web
 
     # 'try_files' works by testing a set of files and using the last one if no match is found.
     # in this case, any /john /dick /harry request coming in will fail to match and be rewritten to /app_<env>.php,
@@ -62,8 +41,11 @@
     
     # I'm guessing it's to prevent external requests for /app_prod.php
     # this should prevent that:
-    error /app_.*\.php$ 404
-
+    
+    @floating-app-env {
+       path_regexp \..*/.*\.php$
+    }
+    error @floating-app-env 404
 
     #location ~ ^/app_{{ pillar.elife.env }}\.php(/|$) {
     #    fastcgi_split_path_info ^(.+\.php)(/.+)$;
@@ -84,11 +66,15 @@
     # but not
     # /app_prod.php?
 
-    php_fastcgi path_regexp ^/app_{{ pillar.elife.env }}\.php(/|$) {
-        split ^(.+\.php)(/.+)$;
-        env SCRIPT_FILENAME ...
-        env DOCUMENT_ROOT ...
-        env ENVIRONMENT_NAME {{ pillar.elife.env }}
+    @rooted-app-env {
+        path_regexp ^/app_{{ pillar.elife.env }}\.php(/|$)
+    }
+    php_fastcgi @rooted-app-env unix//var/php-fpm.sock {
+        #root /srv/search/web
+        #split ^(.+\.php)(/.+)$;
+        #env SCRIPT_FILENAME ...
+        #env DOCUMENT_ROOT ...
+        #env ENVIRONMENT_NAME {{ pillar.elife.env }}
     }
 }
 

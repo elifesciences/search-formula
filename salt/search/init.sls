@@ -114,7 +114,7 @@ search-vhost:
         - require:
             - caddy-config
         - listen_in:
-            - service: nginx-server-service
+            - service: caddy-server-service
             - service: php-fpm
 
 {% else %}
@@ -149,3 +149,9 @@ logrotate-search-logs:
         - source: salt://search/config/etc-logrotate.d-search
         - template: jinja
 
+smoke-tests:
+    cmd.run:
+        - cwd: /srv/search
+        - name: ./smoke_tests.sh
+        - require:
+            - search-vhost
