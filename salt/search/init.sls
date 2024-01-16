@@ -28,7 +28,7 @@ search-repository:
         - require:
             - builder: search-repository
 
-# tells `search-cache-clean` not to delete the .gitkeep file.
+# tell the `search-cache-clean` state not to delete the .gitkeep file.
 # bit weird.
 search-cache-clean.gitkeep:
   file.managed:
@@ -58,7 +58,7 @@ search-cache:
         # lsh@2023-12-06: errors starting when owner isn't elife
         # "PHP Fatal error:  Uncaught JMS\Serializer\Exception\InvalidArgumentException: The cache directory "/srv/search/src/Search/../../var/cache" is not writable."
         # search-console-ready > cmd.run > ./bin/console --env=dev --no-interaction
-        - user: elife # {{ www_user }}
+        - user: {{ deploy_user }} # {{ www_user }}
         - group: {{ www_user }}
         - dir_mode: 775
         - file_mode: 664
@@ -72,7 +72,7 @@ search-cache:
             - search-cache-clean
 
     cmd.run:
-        # all new files in directory will inherit the group (www-user) of the directory
+        # all new files in directory will inherit the group owner (www-user) of the directory
         - name: chmod -R g+s /srv/search/var
         - require:
             - file: search-cache
@@ -113,6 +113,8 @@ search-vhost:
         - template: jinja
         - require:
             - caddy-config
+        - require_in:
+            - cmd: caddy-validate-config
         - listen_in:
             - service: caddy-server-service
             - service: php-fpm
@@ -149,9 +151,11 @@ logrotate-search-logs:
         - source: salt://search/config/etc-logrotate.d-search
         - template: jinja
 
-smoke-tests:
-    cmd.run:
-        - cwd: /srv/search
-        - name: ./smoke_tests.sh
-        - require:
-            - search-vhost
+# would be nice, but I can't guarantee it will run last.
+#smoke-tests:
+#    cmd.run:
+#        - cwd: /srv/search
+#        - name: ./smoke_tests.sh
+#        - require:
+#            - search-vhost
+

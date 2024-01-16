@@ -16,65 +16,88 @@
     
     root * /srv/search/web
 
-    # 'try_files' works by testing a set of files and using the last one if no match is found.
-    # in this case, any /john /dick /harry request coming in will fail to match and be rewritten to /app_<env>.php,
-    # preserving any query params.
-    # - https://caddyserver.com/docs/caddyfile/directives/try_files
-    # - https://caddyserver.com/docs/caddyfile/matchers#file
-    # - https://docs.nginx.com/nginx/admin-guide/web-server/serving-static-content/#trying-several-options
+    # translating the intent of the nginx config, we want:
+    # 1. any request leading with a dot '.', a slash in it and ending with '.php' is 403 (Forbidden)
+    # 2. to serve up any files inside "/srv/search/web/" defaulting to app_<env>.php if no match.
+    # 3. to send requests for "/app_<env>.php" to php-fpm
+    # 4. to 404 requests for "/app_<anythingelse>.php"
 
-    #location / {
-    #    try_files $uri /app_{{ pillar.elife.env }}.php$is_args$args;
-    #}
+    # note: the directives below are wrapped in 'handle' to ensure their order of evaluation matches the file,
+    # otherwse Caddy re-orders them. This approach is more nginx-like. See:
+    # - https://caddyserver.com/docs/caddyfile/directives#directive-order
+    # - https://caddyserver.com/docs/caddyfile/directives/handle#handle
 
-    try_files {path} /app_{{ pillar.elife.env }}.php?{query}
-
-    #location ~ /app_.*.php$ {
-    #    return 404;
-    #}
-
-    # this matches:
-    # /app_.php
-    # /app_prod.php
-    # /foo/app_prod.php
-    # /.././app_.php
-    
-    # I'm guessing it's to prevent external requests for /app_prod.php
-    # this should prevent that:
-    
-    @floating-app-env {
-       path_regexp \..*/.*\.php$
-    }
-    error @floating-app-env 404
-
-    #location ~ ^/app_{{ pillar.elife.env }}\.php(/|$) {
-    #    fastcgi_split_path_info ^(.+\.php)(/.+)$;
-    #    include fastcgi_params;
-    #    fastcgi_param SCRIPT_FILENAME $request_filename;
-    #    fastcgi_param DOCUMENT_ROOT $realpath_root;
-    #    fastcgi_param ENVIRONMENT_NAME {{ pillar.elife.env }};
-    #    fastcgi_intercept_errors on;
-    #    fastcgi_pass unix:/var/php-fpm.sock;
-    #    internal;
-    #}
-
+    # 1. any request leading with a dot '.', a slash in it and ending with '.php' is 403 (Forbidden)
     # matches:
-    # /app_prod.php
-    # /app_prod.php/
-    # /app_prod.php/fooooooo
+    # ./foo.php
+    # ./.foo.php
+    # ././foo.php
+    # ../foo.php
 
-    # but not
-    # /app_prod.php?
-
-    @rooted-app-env {
-        path_regexp ^/app_{{ pillar.elife.env }}\.php(/|$)
+    # The intent is to prevent path traversal for php files, like ./../src/bootstrap.php.
+    # because no other php files are being served let's just disallow *all* requests to *all* php files.
+    @no-direct-php-requests {
+       path *.php
     }
-    php_fastcgi @rooted-app-env unix//var/php-fpm.sock {
-        #root /srv/search/web
-        #split ^(.+\.php)(/.+)$;
-        #env SCRIPT_FILENAME ...
-        #env DOCUMENT_ROOT ...
-        #env ENVIRONMENT_NAME {{ pillar.elife.env }}
+    handle @no-direct-php-requests {
+        error 403
+    }
+
+    handle {
+
+        # 2. to serve up any files inside "/srv/search/web/" if there is a match, defaulting to app_<env>.php if no match.
+        # 'try_files' works by testing a set of files and using the last one if no match is found.
+        # in this case, all requests will fail to match and be (internally) rewritten to "/app_<env>.php",
+        # preserving any query params.
+        # - https://caddyserver.com/docs/caddyfile/directives/try_files
+        # - https://caddyserver.com/docs/caddyfile/matchers#file
+        # - https://docs.nginx.com/nginx/admin-guide/web-server/serving-static-content/#trying-several-options
+
+        try_files {path} /app_{{ pillar.elife.env }}.php?{query}
+
+        # 3. send requests for "/app_<env>.php" to php-fpm
+
+        #location ~ ^/app_{{ pillar.elife.env }}\.php(/|$) {
+        #    fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        #    include fastcgi_params;
+        #    fastcgi_param SCRIPT_FILENAME $request_filename;
+        #    fastcgi_param DOCUMENT_ROOT $realpath_root;
+        #    fastcgi_param ENVIRONMENT_NAME {{ pillar.elife.env }};
+        #    fastcgi_intercept_errors on;
+        #    fastcgi_pass unix:/var/php-fpm.sock;
+        #    internal;
+        #}
+
+        # matches (path only, no query params):
+        # /app_prod.php
+        # /app_prod.php/
+        # /app_prod.php/foo
+
+        # Caddy has no "internal" equivalent (handle rewritten requests only), 
+        # however we should be safe.
+        @app-env {
+            path_regexp ^/app_{{ pillar.elife.env }}\.php(/|$)
+        }
+        handle @app-env {
+            php_fastcgi unix//var/php-fpm.sock {
+                #split ^(.+\.php)(/.+)$;
+                #env SCRIPT_FILENAME ...
+                #env DOCUMENT_ROOT ...
+                #env ENVIRONMENT_NAME {{ pillar.elife.env }}
+            }
+        }
+
+        # 4. 404 any matching requests for "/app_<not-our-env>.php" instead of serving the file.
+
+        # this is the equivalent in Caddy:
+        #@not-app-env {
+        #    path_regexp ^/app_.*\.php$
+        #}
+        #handle @not-app-env {
+        #    error 404
+        #}
+
+        # however, because we're no longer matching any php files (see 1.), this is redundant.
     }
 }
 
