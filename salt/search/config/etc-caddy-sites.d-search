@@ -13,7 +13,7 @@
             time_format rfc3339
         }
     }
-    
+
     root * /srv/search/web
 
     # translating the intent of the nginx config, we want:
@@ -27,8 +27,7 @@
     # - https://caddyserver.com/docs/caddyfile/directives#directive-order
     # - https://caddyserver.com/docs/caddyfile/directives/handle#handle
 
-    # 1. any request leading with a dot '.', a slash in it and ending with '.php' is 403 (Forbidden)
-    # matches:
+    # 1. any request leading with a dot '.', a slash in it and ending with '.php' is 403 (Forbidden):
     # ./foo.php
     # ./.foo.php
     # ././foo.php
@@ -56,14 +55,10 @@
         try_files {path} /app_{{ pillar.elife.env }}.php?{query}
 
         # 3. send requests for "/app_<env>.php" to php-fpm
+        # Caddy has no "internal" equivalent (handle rewritten requests only), however we should be safe.
 
         #location ~ ^/app_{{ pillar.elife.env }}\.php(/|$) {
-        #    fastcgi_split_path_info ^(.+\.php)(/.+)$;
-        #    include fastcgi_params;
-        #    fastcgi_param SCRIPT_FILENAME $request_filename;
-        #    fastcgi_param DOCUMENT_ROOT $realpath_root;
-        #    fastcgi_param ENVIRONMENT_NAME {{ pillar.elife.env }};
-        #    fastcgi_intercept_errors on;
+        #    [...]
         #    fastcgi_pass unix:/var/php-fpm.sock;
         #    internal;
         #}
@@ -73,17 +68,33 @@
         # /app_prod.php/
         # /app_prod.php/foo
 
-        # Caddy has no "internal" equivalent (handle rewritten requests only), 
-        # however we should be safe.
         @app-env {
             path_regexp ^/app_{{ pillar.elife.env }}\.php(/|$)
         }
         handle @app-env {
             php_fastcgi unix//var/php-fpm.sock {
-                #split ^(.+\.php)(/.+)$;
-                #env SCRIPT_FILENAME ...
-                #env DOCUMENT_ROOT ...
-                #env ENVIRONMENT_NAME {{ pillar.elife.env }}
+                # these are supported out of the box:
+                #fastcgi_split_path_info ^(.+\.php)(/.+)$;
+                #include fastcgi_params;
+                #fastcgi_param SCRIPT_FILENAME $request_filename;
+                #fastcgi_param DOCUMENT_ROOT $realpath_root;
+                # see:
+                # - https://caddyserver.com/docs/caddyfile/directives/php_fastcgi#env
+                # - https://github.com/caddyserver/caddy/blob/51e3fdba7738e577b5ccfbad5bd7712fa594afc0/modules/caddyhttp/reverseproxy/fastcgi/fastcgi.go#L289
+
+                # not sure if 'env' and 'fastcgi_param' are equivalent.
+                # looking at some php projects, they are using `getenv` to access it, so I guess so.
+                #fastcgi_param ENVIRONMENT_NAME {{ pillar.elife.env }};
+                env ENVIRONMENT_NAME {{ pillar.elife.env }}
+
+                # "Determines whether FastCGI server responses with codes greater than or equal to 300 should be passed to a client or be intercepted and redirected to nginx for processing with the error_page directive."
+                # I see no extra additional error handling in nginx for these errors (for example, using a fixed 404.html page).
+                # no equivalent for Caddy so I guess we'll have to be ok.
+                #fastcgi_intercept_errors on;
+
+                # "enables capturing and logging of any messages sent by the upstream fastcgi server on stderr."
+                # new, capturing these might be insightful
+                capture_stderr true
             }
         }
 
