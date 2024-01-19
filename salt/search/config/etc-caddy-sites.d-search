@@ -5,10 +5,7 @@
 (config) {
 
     log {
-        output file /var/log/caddy/access.log {
-            # see /etc/logrotate.d/caddy
-            roll_disabled
-        }
+        output file /var/log/caddy/access.log
         format json {
             time_format rfc3339
         }
@@ -43,6 +40,7 @@
     }
 
     handle {
+        skip_log /ping
 
         # 2. to serve up any files inside "/srv/search/web/" if there is a match, defaulting to app_<env>.php if no match.
         # 'try_files' works by testing a set of files and using the last one if no match is found.

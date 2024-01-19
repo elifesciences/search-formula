@@ -1,10 +1,7 @@
 (api-dummy-config) {
 
     log {
-        output file /var/log/caddy/api-dummy.access.log {
-            # see /etc/logrotate.d/caddy
-            roll_disabled
-        }
+        output file /var/log/caddy/api-dummy.access.log
         format json {
             time_format rfc3339
         }
