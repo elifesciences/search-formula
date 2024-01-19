@@ -20,6 +20,8 @@ api-dummy-vhost-dev:
         - require:
             - api-dummy-composer-install
             - search-vhost
+        - require_in:
+            - cmd: caddy-validate-config
         - listen_in:
             - service: nginx-server-service
             - service: php-fpm
