@@ -25,11 +25,6 @@ gearman-db:
         - require:
             - postgres_user: gearman-db-user
 
-# lsh@2019-09-09: remove once file is gone
-gearman-configuration:
-    file.absent:
-        - name: /etc/default/gearman-job-server
-
 gearman-service:
     file.managed:
         - name: /lib/systemd/system/gearman-job-server.service
@@ -59,7 +54,6 @@ clear-gearman:
             systemctl restart gearman-job-server
         - require:
             - gearman-daemon
-            - gearman-configuration
 
 {% endif %} # end dev/ci
 {% endif %} # end leader

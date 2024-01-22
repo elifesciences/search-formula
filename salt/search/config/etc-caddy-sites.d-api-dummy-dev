@@ -1,0 +1,24 @@
+(api-dummy-config) {
+
+    log {
+        output file /var/log/caddy/api-dummy.access.log
+        format json {
+            time_format rfc3339
+        }
+    }
+
+    root * /srv/api-dummy/web
+
+    try_files {path} /index.php?{query}
+
+    @app-env {
+        path /index.php
+    }
+    php_fastcgi @app-env unix//var/php-fpm.sock {
+        capture_stderr true
+    }
+}
+
+http://localhost:8080 http://127.0.0.1:8080 {
+    import api-dummy-config
+}

@@ -31,6 +31,9 @@ search:
     reviewed_preprints: {{ reviewed_preprints|yaml }}
 
 elife:
+    webserver:
+        app: caddy
+
     composer:
         version: 2.2.7
 
