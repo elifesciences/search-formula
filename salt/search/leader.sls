@@ -6,6 +6,7 @@ search-queue-create:
         - runas: {{ pillar.elife.deploy_user.username }}
         - require:
             - goaws
+            - aws-cli
             - aws-credentials-deploy-user
         - require_in:
             - cmd: search-console-ready
