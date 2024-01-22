@@ -89,6 +89,7 @@ search-composer-install:
         - cwd: /srv/search/
         - runas: {{ deploy_user }}
         - require:
+            - gearman-php-extension
             - search-cache
 
 search-configuration-file:
