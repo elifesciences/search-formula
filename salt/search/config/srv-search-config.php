@@ -25,6 +25,15 @@ return [
         'endpoint' => '{{ pillar.search.aws.endpoint }}',
         {% endif %}
     ],
+    'era_articles' => [
+        {% for id, values in pillar.search.era_articles.items() %}
+        '{{ id }}' => [
+            'date' => '{{ values.date }}',
+            'display' => '{{ values.display }}',
+            'download' => '{{ values.download }}',
+        ],
+        {% endfor %}
+    ],
     'rds_articles' => [
         {% for id, values in pillar.search.rds_articles.items() %}
         '{{ id }}' => [
