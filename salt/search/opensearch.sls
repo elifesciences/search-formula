@@ -58,12 +58,8 @@ opensearch-docker-compose:
             image_name: {{ image_name }}
             # OS/ES recommend setting both to 50% of system RAM.
             # max_heap at 2gb on a 4gb system goes OOM doing a reindex.
-            # below values are the same for both ES and OS.
-            # todo: we get a warning about this:
-            # "initial heap size [268435456] not equal to maximum heap size [1073741824]; this can cause resize pauses and prevents memory locking from locking the entire heap"
-            # however until ES is purged min_heap can't be any higher
-            min_heap: 1g # gb, -Xms
-            max_heap: 1g # gb, -Xmx
+            min_heap: 2g # gb, -Xms
+            max_heap: 2g # gb, -Xmx
         - require:
             - opensearch-image
             - srv-opensearch
